@@ -13,7 +13,6 @@
             --white: #ffffff;
             --border: #e0e0e0;
             --success: #27ae60;
-            --danger: #e74c3c;
         }
         body {
             font-family: 'Sarabun', sans-serif;
@@ -37,17 +36,14 @@
         /* Menu Items */
         .category-title { background: #fdf2e9; padding: 8px 10px; border-radius: 5px; margin: 20px 0 10px 0; font-weight: 600; color: var(--primary); font-size: 18px; }
         .menu-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px dashed var(--border); transition: 0.2s; }
-        .menu-item:hover { background: #f9f9f9; }
-        .menu-item.out-of-stock .item-name { text-decoration: line-through; color: #999; }
+        .menu-item:hover { background: #fdfdfd; }
         
-        .item-name { cursor: pointer; flex: 1; font-size: 15px; padding: 0 10px; line-height: 1.4;}
+        .item-name { cursor: pointer; flex: 1; font-size: 15px; padding: 0 10px 0 0; line-height: 1.4;}
         .item-price { font-weight: bold; width: 60px; text-align: right; margin-right: 15px; color: var(--primary);}
         
-        .btn { padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; font-family: 'Sarabun', sans-serif; font-size: 14px; }
-        .btn-toggle { background: var(--success); color: white; width: 80px; margin-right: 5px; font-weight: 500;}
-        .btn-toggle.off { background: var(--danger); }
-        .btn-add { background: var(--primary); color: white; width: 70px; }
-        .btn-add:disabled { background: #ccc; cursor: not-allowed; }
+        .btn { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-family: 'Sarabun', sans-serif; font-size: 14px; font-weight: 500;}
+        .btn-add { background: var(--primary); color: white; width: 75px; }
+        .btn-add:hover { background: #ba4a00; }
 
         /* Notes Section */
         .notes-box { background: #fff3cd; color: #856404; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; line-height: 1.6; border: 1px solid #ffeeba;}
@@ -72,7 +68,7 @@
         .btn-print { width: 100%; padding: 15px; background: var(--success); color: white; font-size: 18px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-family: 'Sarabun'; box-shadow: 0 4px 6px rgba(39, 174, 96, 0.3);}
         .btn-print:hover { background: #219a52; }
 
-        /* ส่วนใบเสร็จ: ซ่อนไว้นอกหน้าจอแต่ยังคงเรนเดอร์ได้ */
+        /* ส่วนใบเสร็จ: ซ่อนไว้นอกหน้าจอ */
         #receipt-container {
             position: fixed;
             left: -9999px;
@@ -109,6 +105,7 @@
 <body>
 
     <div class="container">
+        <!-- เมนูผลไม้ -->
         <div class="menu-section">
             <div class="notes-box">
                 <b>📌 หมายเหตุร้าน:</b><br>
@@ -118,10 +115,11 @@
                 #ร้านสั่งขั้นต่ำ150B #ครบ200Bส่งฟรีโซนในเมือง (ไม่เกิน 7 กิโลเมตร) #ออกไปรอบนอกหรือใกล้เลี่ยงเมืองมีค่าจัดส่งเริ่ม20B
             </div>
             
-            <h2>รายการผลไม้พร้อมส่งวันนี้ (แคปจอได้เลย)</h2>
+            <h2>รายการผลไม้ (คลิกชื่อเพื่อเพิ่มลงบิล)</h2>
             <div id="menu-container"></div>
         </div>
 
+        <!-- รายการสั่งซื้อ -->
         <div class="cart-section">
             <h2>🛒 รายการสั่งซื้อ</h2>
             
@@ -131,7 +129,8 @@
             </div>
 
             <div class="cart-list" id="cart-list">
-                </div>
+                <!-- สินค้าในตะกร้าจะแสดงที่นี่ -->
+            </div>
 
             <div class="form-group">
                 <label>ค่าบริการจัดส่ง (บาท):</label>
@@ -162,6 +161,7 @@
         </div>
     </div>
 
+    <!-- ส่วนใบเสร็จสำหรับแปลงเป็นภาพ -->
     <div id="receipt-container">
         <div id="receipt">
             <div class="r-header">
@@ -203,32 +203,208 @@
     <script>
         const menuData = [
             { category: "🍓---- กล่องละ 50฿ ----🍓", items: [
-                { id: '50-1', name: 'แก้วมังกรขาว เวียดนาม', price: 50, available: true },
-                { id: '50-2', name: 'สาลี่ทอง เนื้อฉ่ำ กรอบ หวานหอม', price: 50, available: true },
-                { id: '50-3', name: 'แอปเปิ้ลเอนวี่ หวาน กรอบ เปลือกบาง (กล่องเล็ก)', price: 50, available: true },
-                { id: '50-4', name: 'แคนตาลูปซันเลดี้ เนื้อหวาน กรอบ อร่อย', price: 50, available: false },
-                { id: '50-5', name: 'มะม่วงเปรี้ยวหั่นชิ้นพอดีคำ+น้ำจิ้ม (เลือกได้)', price: 50, available: true },
-                { id: '50-6', name: 'มะม่วงสามรสหั่นชิ้นกินเพลิน+น้ำจิ้ม', price: 50, available: true },
-                { id: '50-7', name: 'มะม่วงมันหั่นชิ้นกินง่าย+น้ำจิ้ม', price: 50, available: true },
-                { id: 'dip-1', name: '• พริกเกลือนัวร์ (ฟรี)', price: 0, available: true },
-                { id: 'dip-2', name: '• พริกเกลือกะปิแห้ง (ฟรี)', price: 0, available: true },
-                { id: 'dip-3', name: '• พริกเกลือลาวแซ่บ (ฟรี)', price: 0, available: true },
-                { id: 'dip-4', name: '• น้ำจิ้มบ๊วยเค็ม (ฟรี)', price: 0, available: true },
-                { id: 'dip-5', name: '• กะปิปลาร้า (+20฿)', price: 20, available: true },
-                { id: 'dip-6', name: '• กะปิหวาน (+20฿)', price: 20, available: true },
+                { id: '50-1', name: 'แก้วมังกรขาว เวียดนาม', price: 50 },
+                { id: '50-2', name: 'สาลี่ทอง เนื้อฉ่ำ กรอบ หวานหอม', price: 50 },
+                { id: '50-3', name: 'แอปเปิ้ลเอนวี่ หวาน กรอบ เปลือกบาง (กล่องเล็ก)', price: 50 },
+                { id: '50-4', name: 'แคนตาลูปซันเลดี้ เนื้อหวาน กรอบ อร่อย', price: 50 },
+                { id: '50-5', name: 'มะม่วงเปรี้ยวหั่นชิ้นพอดีคำ+น้ำจิ้ม (เลือกได้)', price: 50 },
+                { id: '50-6', name: 'มะม่วงสามรสหั่นชิ้นกินเพลิน+น้ำจิ้ม', price: 50 },
+                { id: '50-7', name: 'มะม่วงมันหั่นชิ้นกินง่าย+น้ำจิ้ม', price: 50 },
+                { id: 'dip-1', name: '• พริกเกลือนัวร์ (ฟรี)', price: 0 },
+                { id: 'dip-2', name: '• พริกเกลือกะปิแห้ง (ฟรี)', price: 0 },
+                { id: 'dip-3', name: '• พริกเกลือลาวแซ่บ (ฟรี)', price: 0 },
+                { id: 'dip-4', name: '• น้ำจิ้มบ๊วยเค็ม (ฟรี)', price: 0 },
+                { id: 'dip-5', name: '• กะปิปลาร้า (+20฿)', price: 20 },
+                { id: 'dip-6', name: '• กะปิหวาน (+20฿)', price: 20 },
             ]},
             { category: "🍋 --- กล่องละ 60฿ --- 🍋", items: [
-                { id: '60-1', name: 'ส้มไต้หวัน หวาน อร่อย ชิ้นใหญ่เต็มคำ', price: 60, available: true },
-                { id: '60-2', name: 'แตงโมบอล ทูโทน (วันนี้มีสองสี)', price: 60, available: true },
-                { id: '60-3', name: 'ฝรั่งแช่บ๊วยโบราณ บ๊วยเค็มแท้ จากบ๊วยสายพันธุ์ญี่ปุ่น หอม กรอบ อร่อย กินเพลิน', price: 60, available: true },
-                { id: '60-4', name: 'สับปะรดหอมสุวรรณ กลิ่นหอม เนื้อกรอบ แกนทานได้ เป็นสับปะรดสายพันธุ์พรีเมี่ยม', price: 60, available: true },
-                { id: '60-5', name: 'มะละกอฮอลแลนด์', price: 60, available: true },
-                { id: '60-6', name: 'แอปเปิ้ลฟูจิ กรอบ อร่อย หวานอมเปรี้ยวนิดๆ', price: 60, available: false },
+                { id: '60-1', name: 'ส้มไต้หวัน หวาน อร่อย ชิ้นใหญ่เต็มคำ', price: 60 },
+                { id: '60-2', name: 'แตงโมบอล ทูโทน (วันนี้มีสองสี)', price: 60 },
+                { id: '60-3', name: 'ฝรั่งแช่บ๊วยโบราณ บ๊วยเค็มแท้ จากบ๊วยสายพันธุ์ญี่ปุ่น หอม กรอบ อร่อย กินเพลิน', price: 60 },
+                { id: '60-4', name: 'สับปะรดหอมสุวรรณ กลิ่นหอม เนื้อกรอบ แกนทานได้ เป็นสับปะรดสายพันธุ์พรีเมี่ยม', price: 60 },
+                { id: '60-5', name: 'มะละกอฮอลแลนด์', price: 60 },
+                { id: '60-6', name: 'แอปเปิ้ลฟูจิ กรอบ อร่อย หวานอมเปรี้ยวนิดๆ', price: 60 },
             ]},
             { category: "🥝 --- กล่องละ 70฿ --- 🥝", items: [
-                { id: '70-1', name: 'กีวี่ พร้อมทาน เปรี้ยวหวาน ทานง่าย น้ำตาลน้อย', price: 70, available: true },
-                { id: '70-2', name: 'ส้มว่อกาน หวานนำเปรี้ยวปลาย เกล็ดแน่น ทานง่าย สดชื่น', price: 70, available: true },
-                { id: '70-3', name: 'องุ่นไชน์มัสแคท (มัสคัท) หวานอร่อย ไม่มีเมล็ด', price: 70, available: true },
-                { id: '70-4', name: 'เมล่อนญี่ปุ่น สีเขียว เนื้อนุ่ม กลิ่นหอม รสชาติหวาน อร่อยมากค่ะ', price: 70, available: true },
+                { id: '70-1', name: 'กีวี่ พร้อมทาน เปรี้ยวหวาน ทานง่าย น้ำตาลน้อย', price: 70 },
+                { id: '70-2', name: 'ส้มว่อกาน หวานนำเปรี้ยวปลาย เกล็ดแน่น ทานง่าย สดชื่น', price: 70 },
+                { id: '70-3', name: 'องุ่นไชน์มัสแคท (มัสคัท) หวานอร่อย ไม่มีเมล็ด', price: 70 },
+                { id: '70-4', name: 'เมล่อนญี่ปุ่น สีเขียว เนื้อนุ่ม กลิ่นหอม รสชาติหวาน อร่อยมากค่ะ', price: 70 },
             ]},
-            { category: "🍑 --- กล่องละ 90฿
+            { category: "🍑 --- กล่องละ 90฿ --- 🍑", items: [
+                { id: '90-1', name: 'แอปเปิ้ลเอนวี่ (กล่องใหญ่) เปลือกบาง หวานกรอบ อร่อยมากค่ะ', price: 90 },
+                { id: '90-2', name: 'กระท้อนทรงเครื่องโบราณ น้ำยำทรงเครื่องสูตรคุณแม่ พร้อมปลากรอบ ถั่วคั่วหอมๆ และกุ้งฝอยขาวมัน ๆ', price: 90 },
+                { id: '90-3', name: 'กระท้อนทรงเครื่องน้ำปลาร้าหวานข้าวคั่ว', price: 90 },
+                { id: '90-4', name: 'สละสุมาลีทรงเครื่องโบราณ (ไม่ได้คว้านเมล็ด)', price: 90 },
+                { id: '90-5', name: 'สละสุมาลีทรงเครื่องน้ำปลาร้าหวานข้าวคั่ว (ไม่ได้คว้านเมล็ด)', price: 90 },
+            ]},
+            { category: "🍉 --- กล่องละ 100฿ --- 🍉", items: [
+                { id: '100-1', name: 'ลิ้นจี่แกะเมล็ดพร้อมทาน', price: 100 },
+                { id: '100-2', name: 'สละสุมาลีคว้านเมล็ดพร้อมทาน', price: 100 },
+            ]}
+        ];
+
+        // สร้างพจนานุกรมเพื่อการค้นหาข้อมูลสินค้าที่ง่ายขึ้น
+        let itemDictionary = {};
+        menuData.forEach(cat => {
+            cat.items.forEach(item => {
+                itemDictionary[item.id] = item;
+            });
+        });
+
+        let cart = {};
+        let deliveryFee = 0;
+
+        function renderMenu() {
+            const container = document.getElementById('menu-container');
+            container.innerHTML = '';
+
+            menuData.forEach(cat => {
+                const catDiv = document.createElement('div');
+                catDiv.className = 'category-title';
+                catDiv.innerText = cat.category;
+                container.appendChild(catDiv);
+
+                cat.items.forEach(item => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'menu-item';
+                    
+                    itemDiv.innerHTML = `
+                        <div class="item-name" onclick="addToCart('${item.id}')">${item.name}</div>
+                        <div class="item-price">${item.price > 0 ? item.price + ' ฿' : 'ฟรี'}</div>
+                        <button class="btn btn-add" onclick="addToCart('${item.id}')">+ เพิ่ม</button>
+                    `;
+                    container.appendChild(itemDiv);
+                });
+            });
+        }
+
+        function addToCart(id) {
+            if(!cart[id]) cart[id] = 1;
+            else cart[id]++;
+            renderCart();
+        }
+
+        function updateQty(id, change) {
+            cart[id] += change;
+            if(cart[id] <= 0) delete cart[id];
+            renderCart();
+        }
+
+        function setDelivery(fee) {
+            deliveryFee = fee;
+            document.querySelectorAll('.del-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if(btn.innerText.includes(fee) || (fee === 0 && btn.innerText.includes('ฟรี'))) {
+                    btn.classList.add('active');
+                }
+            });
+            renderCart();
+        }
+
+        function renderCart() {
+            const list = document.getElementById('cart-list');
+            list.innerHTML = '';
+            let subtotal = 0;
+
+            for (const id in cart) {
+                const item = itemDictionary[id];
+                const qty = cart[id];
+                const totalItem = qty * item.price;
+                subtotal += totalItem;
+
+                const row = document.createElement('div');
+                row.className = 'cart-item';
+                row.innerHTML = `
+                    <div style="flex:1; line-height: 1.3;">
+                        ${item.name} <br>
+                        <small style="color:#d35400; font-weight:bold;">${item.price > 0 ? item.price + '฿' : 'ฟรี'}</small>
+                    </div>
+                    <div class="cart-controls" style="display:flex; align-items:center;">
+                        <button onclick="updateQty('${id}', -1)">-</button>
+                        <span style="margin:0 10px; font-weight:bold;">${qty}</span>
+                        <button onclick="updateQty('${id}', 1)">+</button>
+                    </div>
+                    <div style="width: 50px; text-align:right; font-weight:bold;">${totalItem} ฿</div>
+                `;
+                list.appendChild(row);
+            }
+
+            if(Object.keys(cart).length === 0) {
+                list.innerHTML = '<div style="color:#999; text-align:center; padding-top:80px; font-size:16px;">ยังไม่มีรายการสินค้า<br>คลิกที่ชื่อผลไม้เพื่อเพิ่มลงตะกร้า</div>';
+            }
+
+            document.getElementById('subtotal').innerText = subtotal + ' ฿';
+            document.getElementById('del-fee').innerText = deliveryFee + ' ฿';
+            document.getElementById('grand-total').innerText = (subtotal + deliveryFee) + ' ฿';
+        }
+
+        function generateReceiptImage() {
+            if(Object.keys(cart).length === 0) {
+                alert('กรุณาเพิ่มสินค้าลงตะกร้าก่อนสร้างใบเสร็จ');
+                return;
+            }
+
+            const btn = document.getElementById('btn-download');
+            btn.innerText = 'กำลังสร้างใบเสร็จ...';
+            btn.disabled = true;
+
+            const now = new Date();
+            const timeStr = now.toLocaleDateString('th-TH') + ' ' + now.toLocaleTimeString('th-TH').substring(0,5) + ' น.';
+            const customer = document.getElementById('customer-info').value || 'ลูกค้าทั่วไป';
+
+            document.getElementById('r-time').innerText = 'เวลารับออเดอร์ : ' + timeStr;
+            document.getElementById('r-customer').innerText = 'ติดต่อ : ' + customer;
+
+            const rItems = document.getElementById('r-items');
+            rItems.innerHTML = '';
+            
+            let subtotal = 0;
+            for (const id in cart) {
+                const item = itemDictionary[id];
+                const qty = cart[id];
+                const total = qty * item.price;
+                subtotal += total;
+
+                rItems.innerHTML += `
+                    <tr>
+                        <td style="padding-right: 5px;">${item.name}</td>
+                        <td class="center">x${qty}</td>
+                        <td class="right">${total}</td>
+                    </tr>
+                `;
+            }
+
+            document.getElementById('r-subtotal').innerText = subtotal + ' ฿';
+            document.getElementById('r-delfee').innerText = deliveryFee + ' ฿';
+            document.getElementById('r-grandtotal').innerText = (subtotal + deliveryFee) + ' ฿';
+
+            setTimeout(() => {
+                const receiptElement = document.getElementById('receipt');
+                
+                html2canvas(receiptElement, {
+                    scale: 2, 
+                    backgroundColor: '#ffffff',
+                    useCORS: true 
+                }).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = `Receipt_${Date.now()}.png`;
+                    link.href = canvas.toDataURL("image/png");
+                    link.click(); 
+
+                    btn.innerText = '🖨️ บันทึกใบเสร็จเป็นรูปภาพ (PNG 56mm)';
+                    btn.disabled = false;
+                }).catch(err => {
+                    console.error("เกิดข้อผิดพลาด: ", err);
+                    alert("ไม่สามารถสร้างรูปภาพได้");
+                    btn.innerText = '🖨️ บันทึกใบเสร็จเป็นรูปภาพ (PNG 56mm)';
+                    btn.disabled = false;
+                });
+            }, 300);
+        }
+
+        renderMenu();
+        renderCart();
+    </script>
+</body>
+</html>
