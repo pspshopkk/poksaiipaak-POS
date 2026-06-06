@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>POS - ปอกใส่ปาก ผลไม้พร้อมทาน</title>
+    <title>POS - ปอกใส่ปาก (แอดมิน)</title>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
@@ -13,6 +13,7 @@
             --white: #ffffff;
             --border: #e0e0e0;
             --success: #27ae60;
+            --danger: #e74c3c;
         }
         body {
             font-family: 'Sarabun', sans-serif;
@@ -29,14 +30,19 @@
         }
         /* Layout */
         .menu-section { flex: 2; background: var(--white); padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .cart-section { flex: 1; background: var(--white); padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
+        .cart-section { flex: 1; background: var(--white); padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; flex-direction: column; position: sticky; top: 20px; max-height: 95vh;}
         
         h2 { margin-top: 0; color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
         
         /* Menu Items */
         .category-title { background: #fdf2e9; padding: 8px 10px; border-radius: 5px; margin: 20px 0 10px 0; font-weight: 600; color: var(--primary); font-size: 18px; }
+        .cat-dip { background: #fff0d4; color: #d35400; }
+        
         .menu-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px dashed var(--border); transition: 0.2s; }
         .menu-item:hover { background: #fdfdfd; }
+        .menu-item.out-of-stock { opacity: 0.6; background: #fafafa; }
+        .menu-item.out-of-stock .item-name { text-decoration: line-through; color: #999; }
+        .badge-out { background: var(--danger); color: white; padding: 2px 6px; border-radius: 4px; font-size: 12px; margin-left: 5px; font-weight: bold;}
         
         .item-name { cursor: pointer; flex: 1; font-size: 15px; padding: 0 10px 0 0; line-height: 1.4;}
         .item-price { font-weight: bold; width: 60px; text-align: right; margin-right: 15px; color: var(--primary);}
@@ -44,12 +50,10 @@
         .btn { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-family: 'Sarabun', sans-serif; font-size: 14px; font-weight: 500;}
         .btn-add { background: var(--primary); color: white; width: 75px; }
         .btn-add:hover { background: #ba4a00; }
+        .btn-disabled { background: #ccc; color: white; width: 75px; cursor: not-allowed; }
 
-        /* Notes Section */
-        .notes-box { background: #fff3cd; color: #856404; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; line-height: 1.6; border: 1px solid #ffeeba;}
-        
         /* Cart */
-        .cart-list { flex: 1; overflow-y: auto; margin-bottom: 20px; min-height: 250px; border: 1px solid var(--border); padding: 10px; border-radius: 5px; background: #fafafa;}
+        .cart-list { flex: 1; overflow-y: auto; margin-bottom: 20px; min-height: 200px; border: 1px solid var(--border); padding: 10px; border-radius: 5px; background: #fafafa;}
         .cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 14px; border-bottom: 1px solid #eee; padding-bottom: 8px;}
         .cart-controls button { width: 28px; height: 28px; cursor: pointer; border: 1px solid #ccc; background: #fff; border-radius: 3px; font-weight: bold;}
         
@@ -105,21 +109,13 @@
 <body>
 
     <div class="container">
-        <!-- เมนูผลไม้ -->
         <div class="menu-section">
-            <div class="notes-box">
-                <b>📌 หมายเหตุร้าน:</b><br>
-                !! ราคาและปริมาณผลไม้อาจปรับขึ้น-ลง ตามกลไกราคาในตลาดนะคะ !!<br>
-                🎀 จัดเซ็ตเยี่ยมไข้ ของขวัญ ของฝาก ผูกโบว์ เขียนการ์ด แจ้งได้เลย ร้านมีบริการให้ค่ะ<br>
-                🛵 มีบริการส่งด้วยไรเดอร์ กรณีให้ร้านส่งจะมีเป็นรอบ รบกวนสั่งล่วงหน้า<br>
-                #ร้านสั่งขั้นต่ำ150B #ครบ200Bส่งฟรีโซนในเมือง (ไม่เกิน 7 กิโลเมตร) #ออกไปรอบนอกหรือใกล้เลี่ยงเมืองมีค่าจัดส่งเริ่ม20B
+            <h2>📦 ระบบจัดการออเดอร์ (POS)</h2>
+            <div id="menu-container">
+                <div style="text-align:center; padding:40px; color:#666;">กำลังโหลดฐานข้อมูลสต๊อก... ⏳</div>
             </div>
-            
-            <h2>รายการผลไม้</h2>
-            <div id="menu-container"></div>
         </div>
 
-        <!-- รายการสั่งซื้อ -->
         <div class="cart-section">
             <h2>🛒 รายการสั่งซื้อ</h2>
             
@@ -129,8 +125,7 @@
             </div>
 
             <div class="cart-list" id="cart-list">
-                <!-- สินค้าในตะกร้าจะแสดงที่นี่ -->
-            </div>
+                </div>
 
             <div class="form-group">
                 <label>ค่าบริการจัดส่ง (บาท):</label>
@@ -161,7 +156,6 @@
         </div>
     </div>
 
-    <!-- ส่วนใบเสร็จสำหรับแปลงเป็นภาพ -->
     <div id="receipt-container">
         <div id="receipt">
             <div class="r-header">
@@ -201,86 +195,86 @@
     </div>
 
     <script>
-        const menuData = [
-            { category: "🍓---- กล่องละ 50฿ ----🍓", items: [
-                { id: '50-1', name: 'แก้วมังกรขาว เวียดนาม', price: 50 },
-                { id: '50-2', name: 'สาลี่ทอง', price: 50 },
-                { id: '50-3', name: 'แอปเปิ้ลเอนวี่(กล่องเล็ก)', price: 50 },
-                { id: '50-4', name: 'แคนตาลูปซันเลดี้', price: 50 },
-                { id: '50-5', name: 'มะม่วงเปรี้ยวหั่นชิ้นพอดีคำ', price: 50 },
-                { id: '50-6', name: 'มะม่วงสามรสหั่นชิ้นกินเพลิน', price: 50 },
-                { id: '50-7', name: 'มะม่วงมันหั่นชิ้นกินง่าย', price: 50 },
-                { id: 'dip-1', name: '• พริกเกลือนัวร์ (ฟรี)', price: 0 },
-                { id: 'dip-2', name: '• พริกเกลือกะปิแห้ง (ฟรี)', price: 0 },
-                { id: 'dip-3', name: '• พริกเกลือลาวแซ่บ (ฟรี)', price: 0 },
-                { id: 'dip-4', name: '• น้ำจิ้มบ๊วยเค็ม (ฟรี)', price: 0 },
-                { id: 'dip-5', name: '• กะปิปลาร้า (+20฿)', price: 20 },
-                { id: 'dip-6', name: '• กะปิหวาน (+20฿)', price: 20 },
-            ]},
-            { category: "🍋 --- กล่องละ 60฿ --- 🍋", items: [
-                { id: '60-1', name: 'ส้มไต้หวัน', price: 60 },
-                { id: '60-2', name: 'แตงโมบอล', price: 60 },
-                { id: '60-3', name: 'ฝรั่งแช่บ๊วยโบราณ', price: 60 },
-                { id: '60-4', name: 'สับปะรดหอมสุวรรณสายพันธุ์พรีเมี่ยม', price: 60 },
-                { id: '60-5', name: 'มะละกอฮอลแลนด์', price: 60 },
-                { id: '60-6', name: 'แอปเปิ้ลฟูจิ', price: 60 },
-                { id: '60-7', name: 'แอปเปิ้ลเขียวจีน', price: 60 },
-            ]},
-            { category: "🥝 --- กล่องละ 80฿ --- 🥝", items: [
-                { id: '70-1', name: 'ส้มว่อกาน', price: 80 },
-                { id: '70-2', name: 'เมล่อนญี่ปุ่นสีเขียว เนื้อนุ่ม', price: 80 },
-            ]},
-            { category: "🍑 --- กล่องละ 90฿ --- 🍑", items: [
-                { id: '90-1', name: 'กีวี่เซสปรี พร้อมทาน', price: 90 },
-                { id: '90-2', name: 'แอปเปิ้ลเอนวี่ (กล่องใหญ่)', price: 90 },
-                { id: '90-3', name: 'กระท้อนทรงเครื่องโบราณ น้ำยำทรงเครื่อง', price: 90 },
-                { id: '90-4', name: 'กระท้อนทรงเครื่องน้ำปลาร้าหวานข้าวคั่ว', price: 90 },
-                { id: '90-5', name: 'สละสุมาลีทรงเครื่องโบราณ (ไม่ได้คว้านเมล็ด)', price: 90 },
-                { id: '90-6', name: 'สละสุมาลีทรงเครื่องน้ำปลาร้าหวานข้าวคั่ว (ไม่ได้คว้านเมล็ด)', price: 90 },
-            ]},
-            { category: "🍉 --- กล่องละ 100฿ --- 🍉", items: [
-                { id: '100-1', name: 'องุ่นไชน์มัสแคท (มัสคัท)', price: 100 },
-                { id: '100-2', name: 'ลิ้นจี่แกะเมล็ดพร้อมทาน', price: 100 },
-                { id: '100-3', name: 'สละสุมาลีคว้านเมล็ดพร้อมทาน', price: 100 },
-            ]}
-        ];
+        // ⚠️ ลิงก์เชื่อมฐานข้อมูล Google Apps Script ตัวเดียวกันกับเมนูลูกค้า
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbziXKeVFE-_qwH1dEdE_AAGDvZmpZEKytWOSPjv-y3QrTVMosy2osVSwjMHs0epHdvt/exec'; 
 
-        // สร้างพจนานุกรมเพื่อการค้นหาข้อมูลสินค้าที่ง่ายขึ้น
+        let menuData = [];
         let itemDictionary = {};
-        menuData.forEach(cat => {
-            cat.items.forEach(item => {
-                itemDictionary[item.id] = item;
-            });
-        });
-
         let cart = {};
         let deliveryFee = 0;
+
+        // ดึงข้อมูลจาก GAS
+        async function loadData() {
+            try {
+                const response = await fetch(SCRIPT_URL + '?action=getData');
+                menuData = await response.json();
+                
+                // สร้าง Dictionary เพื่อให้ง่ายตอนค้นหาสินค้าลงตะกร้า
+                menuData.forEach(item => {
+                    itemDictionary[item.id] = item;
+                });
+                
+                renderMenu();
+            } catch (error) {
+                document.getElementById('menu-container').innerHTML = '<div style="text-align:center; padding:20px; color:red;">โหลดข้อมูลไม่สำเร็จ กรุณารีเฟรชหน้าเว็บ</div>';
+            }
+        }
 
         function renderMenu() {
             const container = document.getElementById('menu-container');
             container.innerHTML = '';
 
-            menuData.forEach(cat => {
-                const catDiv = document.createElement('div');
-                catDiv.className = 'category-title';
-                catDiv.innerText = cat.category;
-                container.appendChild(catDiv);
+            // 1. หมวดผลไม้ปกติ
+            const standardCats = [40, 50, 60, 70, 80, 90, 100];
+            standardCats.forEach(cat => {
+                const items = menuData.filter(item => Number(item.category) === cat);
+                if (items.length > 0) {
+                    createCategoryBlock(`🍓 ---- กล่องละ ${cat}฿ ---- 🍓`, items, false);
+                }
+            });
 
-                cat.items.forEach(item => {
-                    const itemDiv = document.createElement('div');
-                    itemDiv.className = 'menu-item';
-                    
-                    itemDiv.innerHTML = `
-                        <div class="item-name" onclick="addToCart('${item.id}')">${item.name}</div>
-                        <div class="item-price">${item.price > 0 ? item.price + ' ฿' : 'ฟรี'}</div>
-                        <button class="btn btn-add" onclick="addToCart('${item.id}')">+ เพิ่ม</button>
-                    `;
-                    container.appendChild(itemDiv);
-                });
+            // 2. หมวดพรีเมียม (>100)
+            const premiumItems = menuData.filter(item => Number(item.category) > 100);
+            if (premiumItems.length > 0) {
+                createCategoryBlock(`✨ ---- ผลไม้พรีเมียม ---- ✨`, premiumItems, false);
+            }
+
+            // 3. หมวดน้ำจิ้ม (0 และ 20)
+            const dipItems = menuData.filter(item => Number(item.category) === 0 || Number(item.category) === 20);
+            if (dipItems.length > 0) {
+                createCategoryBlock(`🥣 ---- ตัวเลือกน้ำจิ้ม / พริกเกลือ ---- 🥣`, dipItems, true);
+            }
+        }
+
+        function createCategoryBlock(title, items, isDip) {
+            const container = document.getElementById('menu-container');
+            const catTitle = document.createElement('div');
+            catTitle.className = isDip ? 'category-title cat-dip' : 'category-title';
+            catTitle.innerText = title;
+            container.appendChild(catTitle);
+
+            items.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = `menu-item ${!item.available ? 'out-of-stock' : ''}`;
+                
+                const priceLabel = `(${item.price > 0 ? item.price + '฿' : 'ฟรี'})`;
+                
+                itemDiv.innerHTML = `
+                    <div class="item-name" ${item.available ? `onclick="addToCart('${item.id}')"` : ''}>
+                        ${item.name} <span style="color:var(--primary); font-size:13px;">${priceLabel}</span>
+                        ${!item.available ? '<span class="badge-out">หมด</span>' : ''}
+                    </div>
+                    ${item.available 
+                        ? `<button class="btn btn-add" onclick="addToCart('${item.id}')">+ เพิ่ม</button>`
+                        : `<button class="btn btn-disabled" disabled>หมด</button>`
+                    }
+                `;
+                container.appendChild(itemDiv);
             });
         }
 
         function addToCart(id) {
+            if(!itemDictionary[id] || !itemDictionary[id].available) return;
             if(!cart[id]) cart[id] = 1;
             else cart[id]++;
             renderCart();
@@ -332,7 +326,7 @@
             }
 
             if(Object.keys(cart).length === 0) {
-                list.innerHTML = '<div style="color:#999; text-align:center; padding-top:80px; font-size:16px;">ยังไม่มีรายการสินค้า<br>คลิกที่ชื่อผลไม้เพื่อเพิ่มลงตะกร้า</div>';
+                list.innerHTML = '<div style="color:#999; text-align:center; padding-top:80px; font-size:16px;">ยังไม่มีรายการสั่งซื้อ<br>คลิกที่ชื่อผลไม้เพื่อเพิ่มลงบิล</div>';
             }
 
             document.getElementById('subtotal').innerText = subtotal + ' ฿';
@@ -404,8 +398,8 @@
             }, 300);
         }
 
-        renderMenu();
-        renderCart();
+        // โหลดข้อมูลเมื่อเปิดหน้าเว็บ
+        loadData();
     </script>
 </body>
 </html>
