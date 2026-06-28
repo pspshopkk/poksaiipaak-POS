@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>POS - ปอกใส่ปาก (แอดมิน)</title>
+    <title>POS - ปอกใส่ปาก (ระบบจัดการหลังบ้าน)</title>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
@@ -72,7 +72,7 @@
         .btn-print { width: 100%; padding: 15px; background: var(--success); color: white; font-size: 18px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-family: 'Sarabun'; box-shadow: 0 4px 6px rgba(39, 174, 96, 0.3);}
         .btn-print:hover { background: #219a52; }
 
-        /* ส่วนใบเสร็จ: ซ่อนไว้นอกหน้าจอ */
+        /* ส่วนใบเสร็จ: ซ่อนไว้นอกหน้าจอ เพื่อสแนปเป็นภาพอย่างเดียว */
         #receipt-container {
             position: fixed;
             left: -9999px;
@@ -112,9 +112,9 @@
 
     <div class="container">
         <div class="menu-section">
-            <h2>📦 ระบบจัดการออเดอร์ (POS)</h2>
+            <h2>📦 ระบบจัดการออเดอร์หน้าร้าน (POS)</h2>
             <div id="menu-container">
-                <div style="text-align:center; padding:40px; color:#666;">กำลังโหลดฐานข้อมูลสต๊อก... ⏳</div>
+                <div style="text-align:center; padding:40px; color:#666;">กำลังโหลดฐานข้อมูลจากระบบคลาวด์... ⏳</div>
             </div>
         </div>
 
@@ -136,8 +136,8 @@
             </div>
             
             <div class="form-group">
-                <label>หมายเหตุ (แสดงในใบเสร็จ):</label>
-                <input type="text" id="order-note" placeholder="เช่น จัดเซ็ตของขวัญ, ไม่รับส้อม">
+                <label>หมายเหตุพิเศษ (พิมพ์ระบุเอง):</label>
+                <input type="text" id="order-note" placeholder="เช่น จัดเซ็ตของขวัญ, ไม่รับช้อนส้อม, แยกพริกเกลือ">
             </div>
 
             <div class="cart-list" id="cart-list">
@@ -168,7 +168,7 @@
                 </div>
             </div>
 
-            <button class="btn-print" id="btn-download" onclick="generateReceiptImage()">🖨️ บันทึกใบเสร็จเป็นรูปภาพ</button>
+            <button class="btn-print" id="btn-download" onclick="generateReceiptImage()">🖨️ บันทึกใบเสร็จเป็นรูปภาพ (PNG 56mm)</button>
         </div>
     </div>
 
@@ -177,8 +177,9 @@
             <div class="r-header">
                 <h3 class="r-title">ปอกใส่ปาก ผลไม้พร้อมทาน</h3>
                 <p class="r-info" id="r-time"></p>
-                <p class="r-info" id="r-channel"></p> <p class="r-info" id="r-customer"></p>
-                <p class="r-note-print" id="r-note"></p>
+                <p class="r-info" id="r-channel"></p>
+                <p class="r-info" id="r-customer"></p>
+                <p class="r-note-print" id="r-note"></p> 
             </div>
             <table class="r-table">
                 <thead>
@@ -212,16 +213,15 @@
     </div>
 
     <script>
-        // ⚠️ ลิงก์เชื่อมฐานข้อมูล Google Apps Script
+        // 🔗 ดึงข้อมูลเมนูแบบ Real-time ลิงก์เดียวกับหน้าร้านลูกค้าของคุณ
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbziXKeVFE-_qwH1dEdE_AAGDvZmpZEKytWOSPjv-y3QrTVMosy2osVSwjMHs0epHdvt/exec'; 
 
         let menuData = [];
         let itemDictionary = {};
         let cart = {};
         let deliveryFee = 0;
-        let orderChannel = 'LINE'; // ตั้งค่าเริ่มต้นเป็น LINE
+        let orderChannel = 'LINE'; 
 
-        // ฟังก์ชันอัปเดตช่องทางการสั่งซื้อ
         function setChannel(channel, btn) {
             orderChannel = channel;
             const parent = btn.parentElement;
@@ -248,6 +248,7 @@
             const container = document.getElementById('menu-container');
             container.innerHTML = '';
 
+            // 1. ผลไม้ราคาปกติ (40 - 100 บาท)
             const standardCats = [40, 50, 60, 70, 80, 90, 100];
             standardCats.forEach(cat => {
                 const items = menuData.filter(item => Number(item.category) === cat);
@@ -256,12 +257,14 @@
                 }
             });
 
+            // 2. ผลไม้ราคาพรีเมียม (ราคาเกิน 100 บาท)
             const premiumItems = menuData.filter(item => Number(item.category) > 100);
             if (premiumItems.length > 0) {
                 createCategoryBlock(`✨ ---- ผลไม้พรีเมียม ---- ✨`, premiumItems, false);
             }
 
-            const dipItems = menuData.filter(item => Number(item.category) === 0 || Number(item.category) === 20);
+            // 3. หมวดน้ำจิ้ม/พริกเกลือทั้งหมด (ราคาต่ำกว่า 40 บาท มัดรวมกัน)
+            const dipItems = menuData.filter(item => Number(item.category) < 40);
             if (dipItems.length > 0) {
                 createCategoryBlock(`🥣 ---- ตัวเลือกน้ำจิ้ม / พริกเกลือ ---- 🥣`, dipItems, true);
             }
@@ -309,7 +312,7 @@
 
         function setDelivery(fee) {
             deliveryFee = fee;
-            const container = document.querySelectorAll('.delivery-btns')[1]; // เลือก div ค่าส่ง
+            const container = document.querySelectorAll('.delivery-btns')[1]; 
             container.querySelectorAll('.del-btn').forEach(btn => {
                 btn.classList.remove('active');
                 if(btn.innerText.includes(fee) || (fee === 0 && btn.innerText.includes('ฟรี'))) {
@@ -373,7 +376,7 @@
             const note = document.getElementById('order-note').value.trim();
 
             document.getElementById('r-time').innerText = 'เวลารับออเดอร์ : ' + timeStr;
-            document.getElementById('r-channel').innerText = 'ช่องทาง : ' + orderChannel; // ใส่ช่องทางลงในใบเสร็จ
+            document.getElementById('r-channel').innerText = 'ช่องทาง : ' + orderChannel; 
             document.getElementById('r-customer').innerText = 'ติดต่อ : ' + customer;
             
             const rNote = document.getElementById('r-note');
@@ -420,12 +423,12 @@
                     link.href = canvas.toDataURL("image/png");
                     link.click(); 
 
-                    btn.innerText = '🖨️ บันทึกใบเสร็จเป็นรูปภาพ';
+                    btn.innerText = '🖨️ บันทึกใบเสร็จเป็นรูปภาพ (PNG 56mm)';
                     btn.disabled = false;
                 }).catch(err => {
                     console.error("เกิดข้อผิดพลาด: ", err);
                     alert("ไม่สามารถสร้างรูปภาพได้");
-                    btn.innerText = '🖨️ บันทึกใบเสร็จเป็นรูปภาพ';
+                    btn.innerText = '🖨️ บันทึกใบเสร็จเป็นรูปภาพ (PNG 56mm)';
                     btn.disabled = false;
                 });
             }, 300);
