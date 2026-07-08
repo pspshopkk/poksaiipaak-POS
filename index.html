@@ -72,7 +72,7 @@
         .btn-print { width: 100%; padding: 15px; background: var(--success); color: white; font-size: 18px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-family: 'Sarabun'; box-shadow: 0 4px 6px rgba(39, 174, 96, 0.3);}
         .btn-print:hover { background: #219a52; }
 
-        /* ส่วนใบเสร็จ: ซ่อนไว้นอกหน้าจอ เพื่อสแนปเป็นภาพอย่างเดียว */
+        /* ส่วนใบเสร็จ */
         #receipt-container {
             position: fixed;
             left: -9999px;
@@ -111,6 +111,7 @@
 <body>
 
     <div class="container">
+        <!-- เมนูผลไม้ฝั่งซ้าย -->
         <div class="menu-section">
             <h2>📦 ระบบจัดการออเดอร์หน้าร้าน (POS)</h2>
             <div id="menu-container">
@@ -118,6 +119,7 @@
             </div>
         </div>
 
+        <!-- รายการสั่งซื้อฝั่งขวา -->
         <div class="cart-section">
             <h2>🛒 รายการสั่งซื้อ</h2>
             
@@ -141,7 +143,8 @@
             </div>
 
             <div class="cart-list" id="cart-list">
-                </div>
+                <!-- สินค้าในตะกร้าจะแสดงที่นี่ -->
+            </div>
 
             <div class="form-group">
                 <label>ค่าบริการจัดส่ง (บาท):</label>
@@ -172,6 +175,7 @@
         </div>
     </div>
 
+    <!-- ส่วนใบเสร็จซ่อนอยู่หลังบ้าน -->
     <div id="receipt-container">
         <div id="receipt">
             <div class="r-header">
@@ -213,7 +217,6 @@
     </div>
 
     <script>
-        // 🔗 ดึงข้อมูลเมนูแบบ Real-time ลิงก์เดียวกับหน้าร้านลูกค้าของคุณ
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbziXKeVFE-_qwH1dEdE_AAGDvZmpZEKytWOSPjv-y3QrTVMosy2osVSwjMHs0epHdvt/exec'; 
 
         let menuData = [];
@@ -248,8 +251,11 @@
             const container = document.getElementById('menu-container');
             container.innerHTML = '';
 
-            // 1. ผลไม้ราคาปกติ (40 - 100 บาท)
-            const standardCats = [40, 50, 60, 70, 80, 90, 100];
+            // 🔥 แก้ไขจุดนี้: ดึงหมวดหมู่ราคาผลไม้ปกติ (40 - 100 บาท) ออกมาจากชีทแบบไดนามิก ไม่ว่าจะมีเศษอย่าง 65 หรือ 75 ก็ตาม
+            const standardCats = [...new Set(menuData.map(item => Number(item.category)))]
+                .filter(cat => cat >= 40 && cat <= 100)
+                .sort((a, b) => a - b); // เรียงราคาจากน้อยไปมากให้ด้วย
+
             standardCats.forEach(cat => {
                 const items = menuData.filter(item => Number(item.category) === cat);
                 if (items.length > 0) {
@@ -257,7 +263,7 @@
                 }
             });
 
-            // 2. ผลไม้ราคาพรีเมียม (ราคาเกิน 100 บาท)
+            // 2. ผลไม้ราคาพรีเมียม (ราคาเกิน 100 บาทขึ้นไป)
             const premiumItems = menuData.filter(item => Number(item.category) > 100);
             if (premiumItems.length > 0) {
                 createCategoryBlock(`✨ ---- ผลไม้พรีเมียม ---- ✨`, premiumItems, false);
@@ -359,6 +365,7 @@
             document.getElementById('grand-total').innerText = (subtotal + deliveryFee) + ' ฿';
         }
 
+        // ฟังก์ชันสร้างรูปใบเสร็จ PNG เหมือนเดิม
         function generateReceiptImage() {
             if(Object.keys(cart).length === 0) {
                 alert('กรุณาเพิ่มสินค้าลงตะกร้าก่อนสร้างใบเสร็จ');
