@@ -83,7 +83,7 @@
         .btn-print { width: 100%; padding: 15px; background: var(--success); color: white; font-size: 18px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-family: 'Sarabun'; box-shadow: 0 4px 6px rgba(39, 174, 96, 0.3);}
         .btn-print:hover { background: #219a52; }
 
-        /* ส่วนใบเสร็จ: ซ่อนไว้นอกหน้าจอ */
+        /* ส่วนใบเสร็จ */
         #receipt-container {
             position: fixed;
             left: -9999px;
@@ -235,6 +235,7 @@
         let menuData = [];
         let itemDictionary = {};
         let cart = {};
+        let cartSauces = {}; 
         let deliveryFee = 0;
         let orderChannel = 'LINE'; 
 
@@ -245,15 +246,16 @@
             btn.classList.add('active');
         }
 
+        function checkFruitSauceEligibility(itemName) {
+            if (itemName.includes('ฝรั่งแช่บ๊วย')) return false;
+            return itemName.includes('มะม่วง') || itemName.includes('สับปะรด') || itemName.includes('แอปเปิ้ล') || itemName.includes('ฝรั่ง');
+        }
+
         async function loadData() {
             try {
                 const response = await fetch(SCRIPT_URL + '?action=getData');
                 menuData = await response.json();
-                
-                menuData.forEach(item => {
-                    itemDictionary[item.id] = item;
-                });
-                
+                menuData.forEach(item => { itemDictionary[item.id] = item; });
                 renderMenu();
             } catch (error) {
                 document.getElementById('menu-container').innerHTML = '<div style="text-align:center; padding:20px; color:red;">โหลดข้อมูลไม่สำเร็จ กรุณารีเฟรชหน้าเว็บ</div>';
@@ -296,7 +298,6 @@
             items.forEach(item => {
                 const itemDiv = document.createElement('div');
                 itemDiv.className = `menu-item ${!item.available ? 'out-of-stock' : ''}`;
-                
                 const priceLabel = `(${item.price > 0 ? item.price + '฿' : 'ฟรี'})`;
                 
                 itemDiv.innerHTML = `
@@ -315,7 +316,6 @@
 
         function addToCart(id) {
             if(!itemDictionary[id] || !itemDictionary[id].available) return;
-            
             if(!cart[id]) cart[id] = 0;
             cart[id]++;
 
@@ -323,7 +323,6 @@
                 if (!cartSauces[id]) cartSauces[id] = [];
                 cartSauces[id].push("พริกเกลือนัวร์ (ฟรี)");
             }
-
             renderCart();
         }
 
@@ -338,10 +337,7 @@
                 cartSauces[id].pop();
             }
 
-            if(cart[id] <= 0) {
-                delete cart[id];
-                delete cartSauces[id];
-            }
+            if(cart[id] <= 0) { delete cart[id]; delete cartSauces[id]; }
             renderCart();
         }
 
@@ -381,10 +377,12 @@
                         if(!cartSauces[id][i]) cartSauces[id][i] = "พริกเกลือนัวร์ (ฟรี)";
                         const curSauce = cartSauces[id][i];
 
+                        // 🌟 เพิ่มสวิตช์ตัวเลือกไม่รับน้ำจิ้มในฝั่งแม่ค้าด้วย
                         sauceSelectorHTML += `
                             <div>
                                 กล่องที่ ${i+1}: 
                                 <select class="cart-sauce-select" onchange="changeCartSauce('${id}', ${i}, this)">
+                                    <option value="ไม่รับน้ำจิ้ม" ${curSauce === 'ไม่รับน้ำจิ้ม' ? 'selected' : ''}>❌ ไม่รับน้ำจิ้ม</option>
                                     <option value="พริกเกลือนัวร์ (ฟรี)" ${curSauce === 'พริกเกลือนัวร์ (ฟรี)' ? 'selected' : ''}>พริกเกลือนัวร์ (ฟรี)</option>
                                     <option value="พริกเกลือกะปิแห้ง (ฟรี)" ${curSauce === 'พริกเกลือกะปิแห้ง (ฟรี)' ? 'selected' : ''}>พริกเกลือกะปิแห้ง (ฟรี)</option>
                                     <option value="พริกเกลือลาวแซ่บ (ฟรี)" ${curSauce === 'พริกเกลือลาวแซ่บ (ฟรี)' ? 'selected' : ''}>พริกเกลือลาวแซ่บ (ฟรี)</option>
@@ -427,31 +425,21 @@
             document.getElementById('grand-total').innerText = (subtotal + deliveryFee) + ' ฿';
         }
 
-        // ✨ ⚙️ ระบบถอดรหัสข้อความสั่งซื้ออัตโนมัติ (Auto Parser)
+        // ระบบถอดรหัสข้อความสั่งซื้ออัตโนมัติ (Auto Paste)
         function parseAutoOrder() {
             const text = document.getElementById('auto-paste-area').value;
-            if (!text.trim()) {
-                alert('กรุณาวางข้อความสั่งซื้อของลูกค้าก่อนครับ 😊');
-                return;
-            }
+            if (!text.trim()) { alert('กรุณาวางข้อความสั่งซื้อของลูกค้าก่อนครับ 😊'); return; }
             
-            cart = {};
-            cartSauces = {};
-            
+            cart = {}; cartSauces = {};
             const lines = text.split('\n');
-            let custName = '';
-            let custPhone = '';
-            let custNote = '';
+            let custName = ''; let custPhone = ''; let custNote = '';
             
             lines.forEach(line => {
                 line = line.trim();
-                if (line.includes('ชื่อลูกค้า:')) {
-                    custName = line.split('ชื่อลูกค้า:')[1].trim();
-                } else if (line.includes('เบอร์โทร:')) {
-                    custPhone = line.split('เบอร์โทร:')[1].trim();
-                } else if (line.includes('หมายเหตุ:')) {
-                    custNote = line.split('หมายเหตุ:')[1].trim();
-                } else if (line.startsWith('-')) {
+                if (line.includes('ชื่อลูกค้า:')) { custName = line.split('ชื่อลูกค้า:')[1].trim(); }
+                else if (line.includes('เบอร์โทร:')) { custPhone = line.split('เบอร์โทร:')[1].trim(); }
+                else if (line.includes('หมายเหตุ:')) { custNote = line.split('หมายเหตุ:')[1].trim(); }
+                else if (line.startsWith('-')) {
                     const parts = line.split(/\s+x\s+/);
                     if (parts.length >= 2) {
                         const leftPart = parts[0].replace(/^-\s*/, '').trim(); 
@@ -459,10 +447,7 @@
                         
                         let matchedId = null;
                         for (const id in itemDictionary) {
-                            if (leftPart.includes(itemDictionary[id].name)) {
-                                matchedId = id;
-                                break;
-                            }
+                            if (leftPart.includes(itemDictionary[id].name)) { matchedId = id; break; }
                         }
                         
                         if (matchedId) {
@@ -478,7 +463,7 @@
                                     for(let i=0; i<qty; i++) {
                                         let s = sauces[i] ? sauces[i].trim() : "พริกเกลือนัวร์ (ฟรี)";
                                         s = s.replace(/\s*\*ไม่ฟรี/, '');
-                                        cartSauces[matchedId].push(s);
+                                        cartSauces[matchedId].push(s); // แตกคำแกะ "ไม่รับน้ำจิ้ม" เข้าสู่ระบบจำลองได้ทันที
                                     }
                                 } else if (checkFruitSauceEligibility(itemDictionary[matchedId].name)) {
                                     cartSauces[matchedId] = Array(qty).fill("พริกเกลือนัวร์ (ฟรี)");
@@ -491,22 +476,16 @@
             
             document.getElementById('customer-info').value = (custName + ' ' + custPhone).trim() || 'ลูกค้าทั่วไป';
             document.getElementById('order-note').value = custNote;
-            
             renderCart();
             alert('✨ ดึงข้อมูลและน้ำจิ้มลงบิลอัตโนมัติสำเร็จแล้วครับ!');
             document.getElementById('auto-paste-area').value = ''; 
         }
 
         function generateReceiptImage() {
-            if(Object.keys(cart).length === 0) {
-                alert('กรุณาเพิ่มสินค้าลงตะกร้าก่อนสร้างใบเสร็จ');
-                return;
-            }
+            if(Object.keys(cart).length === 0) { alert('กรุณาเพิ่มสินค้าลงตะกร้าก่อนสร้างใบเสร็จ'); return; }
 
             const btn = document.getElementById('btn-download');
-            btn.innerText = 'กำลังสร้างใบเสร็จ...';
-            btn.disabled = true;
-
+            btn.innerText = 'กำลังสร้างใบเสร็จ...'; btn.disabled = true;
             const now = new Date();
             const timeStr = now.toLocaleDateString('th-TH') + ' ' + now.toLocaleTimeString('th-TH').substring(0,5) + ' น.';
             
@@ -518,12 +497,8 @@
             document.getElementById('r-customer').innerText = 'ติดต่อ : ' + customer;
             
             const rNote = document.getElementById('r-note');
-            if(note !== "") {
-                rNote.innerText = '📌 หมายเหตุ: ' + note;
-                rNote.style.display = 'block';
-            } else {
-                rNote.style.display = 'none';
-            }
+            if(note !== "") { rNote.innerText = '📌 หมายเหตุ: ' + note; rNote.style.display = 'block'; } 
+            else { rNote.style.display = 'none'; }
 
             const rItems = document.getElementById('r-items');
             rItems.innerHTML = '';
@@ -555,24 +530,15 @@
 
             setTimeout(() => {
                 const receiptElement = document.getElementById('receipt');
-                
-                html2canvas(receiptElement, {
-                    scale: 2, 
-                    backgroundColor: '#ffffff',
-                    useCORS: true 
-                }).then(canvas => {
+                html2canvas(receiptElement, { scale: 2, backgroundColor: '#ffffff', useCORS: true }).then(canvas => {
                     const link = document.createElement('a');
                     link.download = `Receipt_${Date.now()}.png`;
                     link.href = canvas.toDataURL("image/png");
                     link.click(); 
-
-                    btn.innerText = '🖨️ บันทึกใบเสร็จเป็นรูปภาพ (PNG 56mm)';
-                    btn.disabled = false;
+                    btn.innerText = '🖨️ บันทึกใบเสร็จเป็นรูปภาพ (PNG 56mm)'; btn.disabled = false;
                 }).catch(err => {
-                    console.error("เกิดข้อผิดพลาด: ", err);
-                    alert("ไม่สามารถสร้างรูปภาพได้");
-                    btn.innerText = '🖨️ บันทึกใบเสร็จเป็นรูปภาพ (PNG 56mm)';
-                    btn.disabled = false;
+                    console.error(err); alert("ไม่สามารถสร้างรูปภาพได้");
+                    btn.innerText = '🖨️ บันทึกใบเสร็จเป็นรูปภาพ (PNG 56mm)'; btn.disabled = false;
                 });
             }, 300);
         }
