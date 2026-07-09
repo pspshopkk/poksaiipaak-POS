@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>POS - ปอกใส่ปาก (POS)</title>
+    <title>POS - ปอกใส่ปาก (ระบบจัดการหลังบ้าน)</title>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
@@ -49,6 +49,8 @@
             border-radius: 12px; 
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03); 
         }
+        
+        /* ล็อคขอบเขตฝั่งตะกร้าสินค้าไม่ให้แตกแถว */
         .cart-section { 
             flex: 1.2; 
             background: var(--white); 
@@ -60,7 +62,7 @@
             position: sticky; 
             top: 24px; 
             max-height: calc(100vh - 48px); 
-            overflow-y: auto; 
+            overflow: hidden; /* เปลี่ยนเป็น hidden เพื่อบังคับให้สกรอลล์เฉพาะด้านใน */
         }
         
         h2 { 
@@ -70,7 +72,15 @@
             color: var(--text-main); 
             border-bottom: 2px solid var(--border); 
             padding-bottom: 12px; 
-            margin-bottom: 20px;
+            margin-bottom: 16px;
+        }
+        
+        /* 🛠️ กล่องหุ้มเนื้อหาภายในตะกร้าที่เปิดให้สกรอลล์ได้ โดยไม่กระทบกับปุ่มกดด้านล่าง */
+        .cart-body {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 16px;
+            padding-right: 6px; /* เว้นพื้นที่ให้แถบสกรอลล์ไม่เบียดเนื้อหา */
         }
         
         /* กล่อง Auto Paste */
@@ -161,14 +171,12 @@
 
         /* ตะกร้าสินค้าด้านขวา */
         .cart-list { 
-            flex: 1; 
-            overflow-y: auto; 
             margin-bottom: 16px; 
-            min-height: 120px; 
             border: 1px solid var(--border); 
             padding: 12px; 
             border-radius: 8px; 
             background: #F8FAFC;
+            /* นำระบบสกรอลล์ชั้นนี้ออก เพื่อให้เนื้อหาขยายตัวลื่นไหลไปกับกล่องใหญ่ด้านบน */
         }
         .cart-item { display: flex; flex-direction: column; margin-bottom: 14px; font-size: 14px; border-bottom: 1px solid var(--border); padding-bottom: 12px;}
         .cart-item-main { display: flex; justify-content: space-between; align-items: center; width: 100%; }
@@ -213,10 +221,11 @@
         .delivery-btns button.del-btn.active { background: var(--text-main); color: white; border-color: var(--text-main); }
         
         /* สรุปยอดเงิน */
-        .totals { border-top: 2px dashed var(--border); padding-top: 14px; margin-bottom: 16px; }
+        .totals { border-top: 2px dashed var(--border); padding-top: 14px; margin-bottom: 4px; }
         .total-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 14px; color: var(--text-muted);}
         .total-row.grand { font-size: 22px; font-weight: 700; color: var(--primary-dark); margin-top: 10px;}
         
+        /* ปุ่มออกใบเสร็จแบบคงที่ ล็อคตำแหน่งให้อยู่ท้ายสุดของกล่องเสมอ */
         .btn-print { 
             width: 100%; 
             padding: 14px; 
@@ -229,7 +238,7 @@
             font-weight: 700; 
             font-family: 'Sarabun'; 
             box-shadow: 0 4px 12px rgba(39, 174, 96, 0.2); 
-            margin-top: auto;
+            margin-top: auto; /* ดันปุ่มลงล่างสุด */
             transition: background 0.2s;
         }
         .btn-print:hover { background: #1E7E34; }
@@ -255,7 +264,6 @@
 <body>
 
     <div class="container">
-        <!-- ฝั่งแสดงเมนูสินค้า -->
         <div class="menu-section">
             <h2>ระบบจัดการออเดอร์หน้าร้าน (POS)</h2>
             <div id="menu-container">
@@ -263,67 +271,65 @@
             </div>
         </div>
 
-        <!-- ฝั่งจัดการตะกร้าสินค้า -->
         <div class="cart-section">
             <h2>รายการสั่งซื้อปัจจุบัน</h2>
             
-            <div class="auto-paste-box">
-                <label style="display:block; font-size:13px; font-weight:bold; color:var(--accent-blue); margin-bottom:6px;">วางข้อความคำสั่งซื้อ (Auto Paste):</label>
-                <textarea id="auto-paste-area" rows="2" placeholder="วางข้อความสรุปคำสั่งซื้อของลูกค้าที่นี่..."></textarea>
-                <button type="button" class="btn-auto-parse" onclick="parseAutoOrder()">ประมวลผลออเดอร์อัตโนมัติ</button>
-            </div>
-
-            <div class="form-group">
-                <label>ช่องทางการสั่งซื้อ:</label>
-                <div class="delivery-btns">
-                    <button type="button" class="channel-line active" onclick="setChannel('LINE', this)">LINE</button>
-                    <button type="button" class="channel-fb" onclick="setChannel('Facebook', this)">Facebook Inbox</button>
-                    <button type="button" class="channel-shop" onclick="setChannel('หน้าร้าน', this)">หน้าร้าน</button>
+            <div class="cart-body">
+                <div class="auto-paste-box">
+                    <label style="display:block; font-size:13px; font-weight:bold; color:var(--accent-blue); margin-bottom:6px;">วางข้อความคำสั่งซื้อ (Auto Paste):</label>
+                    <textarea id="auto-paste-area" rows="2" placeholder="วางข้อความสรุปคำสั่งซื้อของลูกค้าที่นี่..."></textarea>
+                    <button type="button" class="btn-auto-parse" onclick="parseAutoOrder()">ประมวลผลออเดอร์อัตโนมัติ</button>
                 </div>
-            </div>
-            
-            <div class="form-group">
-                <label>ชื่อลูกค้า / เบอร์ติดต่อ:</label>
-                <input type="text" id="customer-info" placeholder="ระบุข้อมูลลูกค้า (เช่น คุณเอ / 081-xxx-xxxx)">
-            </div>
-            
-            <div class="form-group">
-                <label>หมายเหตุคำสั่งซื้อ:</label>
-                <input type="text" id="order-note" placeholder="ระบุเงื่อนไขพิเศษเพิ่มเติม">
-            </div>
 
-            <div class="cart-list" id="cart-list"></div>
+                <div class="form-group">
+                    <label>ช่องทางการสั่งซื้อ:</label>
+                    <div class="delivery-btns">
+                        <button type="button" class="channel-line active" onclick="setChannel('LINE', this)">LINE</button>
+                        <button type="button" class="channel-fb" onclick="setChannel('Facebook', this)">Facebook Inbox</button>
+                        <button type="button" class="channel-shop" onclick="setChannel('หน้าร้าน', this)">หน้าร้าน</button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>ชื่อลูกค้า / เบอร์ติดต่อ:</label>
+                    <input type="text" id="customer-info" placeholder="ระบุข้อมูลลูกค้า (เช่น คุณเอ / 081-xxx-xxxx)">
+                </div>
+                
+                <div class="form-group">
+                    <label>หมายเหตุคำสั่งซื้อ:</label>
+                    <input type="text" id="order-note" placeholder="ระบุเงื่อนไขพิเศษเพิ่มเติม">
+                </div>
 
-            <div class="form-group">
-                <label>ค่าบริการจัดส่ง:</label>
-                <div class="delivery-btns">
-                    <button type="button" class="del-btn active" onclick="setDelivery(0)">ฟรี / รับเอง</button>
-                    <button type="button" class="del-btn" onclick="setDelivery(10)">+ 10 บาท</button>
-                    <button type="button" class="del-btn" onclick="setDelivery(20)">+ 20 บาท</button>
-                    <button type="button" class="del-btn" onclick="setDelivery(30)">+ 30 บาท</button>
-                </div>
-            </div>
+                <div class="cart-list" id="cart-list"></div>
 
-            <div class="totals">
-                <div class="total-row">
-                    <span>รวมค่าสินค้า:</span>
-                    <span id="subtotal">0 ฿</span>
+                <div class="form-group">
+                    <label>ค่าบริการจัดส่ง:</label>
+                    <div class="delivery-btns">
+                        <button type="button" class="del-btn active" onclick="setDelivery(0)">ฟรี / รับเอง</button>
+                        <button type="button" class="del-btn" onclick="setDelivery(10)">+ 10 บาท</button>
+                        <button type="button" class="del-btn" onclick="setDelivery(20)">+ 20 บาท</button>
+                        <button type="button" class="del-btn" onclick="setDelivery(30)">+ 30 บาท</button>
+                    </div>
                 </div>
-                <div class="total-row">
-                    <span>ค่าจัดส่ง:</span>
-                    <span id="del-fee">0 ฿</span>
-                </div>
-                <div class="total-row grand">
-                    <span>ยอดสุทธิ:</span>
-                    <span id="grand-total">0 ฿</span>
-                </div>
-            </div>
 
-            <button class="btn-print" id="btn-download" onclick="generateReceiptImage()">ออกใบเสร็จเป็นรูปภาพ (PNG 56mm)</button>
+                <div class="totals">
+                    <div class="total-row">
+                        <span>รวมค่าสินค้า:</span>
+                        <span id="subtotal">0 ฿</span>
+                    </div>
+                    <div class="total-row">
+                        <span>ค่าจัดส่ง:</span>
+                        <span id="del-fee">0 ฿</span>
+                    </div>
+                    <div class="total-row grand">
+                        <span>ยอดสุทธิ:</span>
+                        <span id="grand-total">0 ฿</span>
+                    </div>
+                </div>
+            </div> <button class="btn-print" id="btn-download" onclick="generateReceiptImage()">ออกใบเสร็จเป็นรูปภาพ (PNG 56mm)</button>
         </div>
     </div>
 
-    <!-- ส่วนจำลองใบเสร็จสำหรับการพิมพ์/บันทึกรูปภาพ -->
     <div id="receipt-container">
         <div id="receipt">
             <div class="r-header">
