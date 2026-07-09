@@ -14,6 +14,7 @@
             --border: #e0e0e0;
             --success: #27ae60;
             --danger: #e74c3c;
+            --accent-blue: #0084FF;
         }
         body {
             font-family: 'Sarabun', sans-serif;
@@ -25,15 +26,21 @@
         .container {
             display: flex;
             gap: 20px;
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }
         /* Layout */
-        .menu-section { flex: 2; background: var(--white); padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .cart-section { flex: 1; background: var(--white); padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; flex-direction: column; position: sticky; top: 20px; max-height: 95vh;}
+        .menu-section { flex: 1.8; background: var(--white); padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .cart-section { flex: 1.2; background: var(--white); padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; flex-direction: column; position: sticky; top: 20px; max-height: 95vh;}
         
         h2 { margin-top: 0; color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
         
+        /* Auto Paste Box */
+        .auto-paste-box { background: #eef6ff; border: 1px solid #b3d7ff; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
+        .auto-paste-box textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-family: 'Sarabun'; font-size: 13px; resize: vertical; box-sizing: border-box; }
+        .btn-auto-parse { background: var(--accent-blue); color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-family: 'Sarabun'; font-weight: bold; margin-top: 8px; width: 100%; font-size: 14px;}
+        .btn-auto-parse:hover { background: #0066cc; }
+
         /* Menu Items */
         .category-title { background: #fdf2e9; padding: 8px 10px; border-radius: 5px; margin: 20px 0 10px 0; font-weight: 600; color: var(--primary); font-size: 18px; }
         .cat-dip { background: #fff0d4; color: #d35400; }
@@ -52,11 +59,15 @@
         .btn-add:hover { background: #ba4a00; }
         .btn-disabled { background: #ccc; color: white; width: 75px; cursor: not-allowed; }
 
-        /* Cart */
+        /* Cart & Sauce Selector */
         .cart-list { flex: 1; overflow-y: auto; margin-bottom: 20px; min-height: 200px; border: 1px solid var(--border); padding: 10px; border-radius: 5px; background: #fafafa;}
-        .cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 14px; border-bottom: 1px solid #eee; padding-bottom: 8px;}
+        .cart-item { display: flex; flex-direction: column; margin-bottom: 12px; font-size: 14px; border-bottom: 1px solid #eee; padding-bottom: 10px;}
+        .cart-item-main { display: flex; justify-content: space-between; align-items: center; width: 100%; }
         .cart-controls button { width: 28px; height: 28px; cursor: pointer; border: 1px solid #ccc; background: #fff; border-radius: 3px; font-weight: bold;}
         
+        .cart-sauce-row { background: #fff; padding: 6px; border-radius: 4px; border: 1px dashed #ccc; margin-top: 6px; font-size: 12px; display: flex; flex-direction: column; gap: 4px; }
+        .cart-sauce-select { padding: 3px; border-radius: 4px; border: 1px solid #ccc; font-family: 'Sarabun'; font-size: 12px; width: 100%; margin-top: 2px;}
+
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-size: 14px; margin-bottom: 5px; font-weight: 600;}
         .form-group input { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px; font-family: 'Sarabun'; box-sizing: border-box; font-size: 14px;}
@@ -72,7 +83,7 @@
         .btn-print { width: 100%; padding: 15px; background: var(--success); color: white; font-size: 18px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-family: 'Sarabun'; box-shadow: 0 4px 6px rgba(39, 174, 96, 0.3);}
         .btn-print:hover { background: #219a52; }
 
-        /* ส่วนใบเสร็จ */
+        /* ส่วนใบเสร็จ: ซ่อนไว้นอกหน้าจอ */
         #receipt-container {
             position: fixed;
             left: -9999px;
@@ -111,7 +122,6 @@
 <body>
 
     <div class="container">
-        <!-- เมนูผลไม้ฝั่งซ้าย -->
         <div class="menu-section">
             <h2>📦 ระบบจัดการออเดอร์หน้าร้าน (POS)</h2>
             <div id="menu-container">
@@ -119,10 +129,15 @@
             </div>
         </div>
 
-        <!-- รายการสั่งซื้อฝั่งขวา -->
         <div class="cart-section">
             <h2>🛒 รายการสั่งซื้อ</h2>
             
+            <div class="auto-paste-box">
+                <label style="display:block; font-size:13px; font-weight:bold; color:var(--accent-blue); margin-bottom:5px;">📋 วางข้อความคำสั่งซื้อจากลูกค้า (Auto Paste):</label>
+                <textarea id="auto-paste-area" rows="3" placeholder="วางข้อความที่ลูกค้าคัดลอกส่งมาที่นี่..."></textarea>
+                <button type="button" class="btn-auto-parse" onclick="parseAutoOrder()">✨ โหลดข้อมูลออเดอร์อัตโนมัติ</button>
+            </div>
+
             <div class="form-group">
                 <label>ช่องทางการสั่งซื้อ:</label>
                 <div class="delivery-btns">
@@ -143,8 +158,7 @@
             </div>
 
             <div class="cart-list" id="cart-list">
-                <!-- สินค้าในตะกร้าจะแสดงที่นี่ -->
-            </div>
+                </div>
 
             <div class="form-group">
                 <label>ค่าบริการจัดส่ง (บาท):</label>
@@ -175,7 +189,6 @@
         </div>
     </div>
 
-    <!-- ส่วนใบเสร็จซ่อนอยู่หลังบ้าน -->
     <div id="receipt-container">
         <div id="receipt">
             <div class="r-header">
@@ -251,10 +264,9 @@
             const container = document.getElementById('menu-container');
             container.innerHTML = '';
 
-            // 🔥 แก้ไขจุดนี้: ดึงหมวดหมู่ราคาผลไม้ปกติ (40 - 100 บาท) ออกมาจากชีทแบบไดนามิก ไม่ว่าจะมีเศษอย่าง 65 หรือ 75 ก็ตาม
             const standardCats = [...new Set(menuData.map(item => Number(item.category)))]
                 .filter(cat => cat >= 40 && cat <= 100)
-                .sort((a, b) => a - b); // เรียงราคาจากน้อยไปมากให้ด้วย
+                .sort((a, b) => a - b);
 
             standardCats.forEach(cat => {
                 const items = menuData.filter(item => Number(item.category) === cat);
@@ -263,13 +275,11 @@
                 }
             });
 
-            // 2. ผลไม้ราคาพรีเมียม (ราคาเกิน 100 บาทขึ้นไป)
             const premiumItems = menuData.filter(item => Number(item.category) > 100);
             if (premiumItems.length > 0) {
                 createCategoryBlock(`✨ ---- ผลไม้พรีเมียม ---- ✨`, premiumItems, false);
             }
 
-            // 3. หมวดน้ำจิ้ม/พริกเกลือทั้งหมด (ราคาต่ำกว่า 40 บาท มัดรวมกัน)
             const dipItems = menuData.filter(item => Number(item.category) < 40);
             if (dipItems.length > 0) {
                 createCategoryBlock(`🥣 ---- ตัวเลือกน้ำจิ้ม / พริกเกลือ ---- 🥣`, dipItems, true);
@@ -305,15 +315,39 @@
 
         function addToCart(id) {
             if(!itemDictionary[id] || !itemDictionary[id].available) return;
-            if(!cart[id]) cart[id] = 1;
-            else cart[id]++;
+            
+            if(!cart[id]) cart[id] = 0;
+            cart[id]++;
+
+            if (checkFruitSauceEligibility(itemDictionary[id].name)) {
+                if (!cartSauces[id]) cartSauces[id] = [];
+                cartSauces[id].push("พริกเกลือนัวร์ (ฟรี)");
+            }
+
             renderCart();
         }
 
         function updateQty(id, change) {
+            if(!cart[id]) return;
             cart[id] += change;
-            if(cart[id] <= 0) delete cart[id];
+
+            if (!cartSauces[id]) cartSauces[id] = [];
+            if (change > 0) {
+                cartSauces[id].push("พริกเกลือนัวร์ (ฟรี)");
+            } else if (change < 0) {
+                cartSauces[id].pop();
+            }
+
+            if(cart[id] <= 0) {
+                delete cart[id];
+                delete cartSauces[id];
+            }
             renderCart();
+        }
+
+        function changeCartSauce(itemId, index, selectEl) {
+            if (!cartSauces[itemId]) cartSauces[itemId] = [];
+            cartSauces[itemId][index] = selectEl.value;
         }
 
         function setDelivery(fee) {
@@ -339,19 +373,47 @@
                 const totalItem = qty * item.price;
                 subtotal += totalItem;
 
+                let sauceSelectorHTML = '';
+                if (checkFruitSauceEligibility(item.name) && qty > 0) {
+                    sauceSelectorHTML = `<div class="cart-sauce-row">`;
+                    for(let i=0; i<qty; i++) {
+                        if(!cartSauces[id]) cartSauces[id] = [];
+                        if(!cartSauces[id][i]) cartSauces[id][i] = "พริกเกลือนัวร์ (ฟรี)";
+                        const curSauce = cartSauces[id][i];
+
+                        sauceSelectorHTML += `
+                            <div>
+                                กล่องที่ ${i+1}: 
+                                <select class="cart-sauce-select" onchange="changeCartSauce('${id}', ${i}, this)">
+                                    <option value="พริกเกลือนัวร์ (ฟรี)" ${curSauce === 'พริกเกลือนัวร์ (ฟรี)' ? 'selected' : ''}>พริกเกลือนัวร์ (ฟรี)</option>
+                                    <option value="พริกเกลือกะปิแห้ง (ฟรี)" ${curSauce === 'พริกเกลือกะปิแห้ง (ฟรี)' ? 'selected' : ''}>พริกเกลือกะปิแห้ง (ฟรี)</option>
+                                    <option value="พริกเกลือลาวแซ่บ (ฟรี)" ${curSauce === 'พริกเกลือลาวแซ่บ (ฟรี)' ? 'selected' : ''}>พริกเกลือลาวแซ่บ (ฟรี)</option>
+                                    <option value="น้ำจิ้มบ๊วยเค็ม (ฟรี)" ${curSauce === 'น้ำจิ้มบ๊วยเค็ม (ฟรี)' ? 'selected' : ''}>น้ำจิ้มบ๊วยเค็ม (ฟรี)</option>
+                                    <option value="กะปิปลาร้า (+20฿)" ${curSauce === 'กะปิปลาร้า (+20฿)' ? 'selected' : ''}>กะปิปลาร้า (+20฿)</option>
+                                    <option value="กะปิหวาน (+20฿)" ${curSauce === 'กะปิหวาน (+20฿)' ? 'selected' : ''}>กะปิหวาน (+20฿)</option>
+                                </select>
+                            </div>
+                        `;
+                    }
+                    sauceSelectorHTML += `</div>`;
+                }
+
                 const row = document.createElement('div');
                 row.className = 'cart-item';
                 row.innerHTML = `
-                    <div style="flex:1; line-height: 1.3;">
-                        ${item.name} <br>
-                        <small style="color:#d35400; font-weight:bold;">${item.price > 0 ? item.price + '฿' : 'ฟรี'}</small>
+                    <div class="cart-item-main">
+                        <div style="flex:1; line-height: 1.3;">
+                            ${item.name} <br>
+                            <small style="color:#d35400; font-weight:bold;">${item.price > 0 ? item.price + '฿' : 'ฟรี'}</small>
+                        </div>
+                        <div class="cart-controls" style="display:flex; align-items:center;">
+                            <button onclick="updateQty('${id}', -1)">-</button>
+                            <span style="margin:0 10px; font-weight:bold;">${qty}</span>
+                            <button onclick="updateQty('${id}', 1)">+</button>
+                        </div>
+                        <div style="width: 50px; text-align:right; font-weight:bold;">${totalItem} ฿</div>
                     </div>
-                    <div class="cart-controls" style="display:flex; align-items:center;">
-                        <button onclick="updateQty('${id}', -1)">-</button>
-                        <span style="margin:0 10px; font-weight:bold;">${qty}</span>
-                        <button onclick="updateQty('${id}', 1)">+</button>
-                    </div>
-                    <div style="width: 50px; text-align:right; font-weight:bold;">${totalItem} ฿</div>
+                    ${sauceSelectorHTML}
                 `;
                 list.appendChild(row);
             }
@@ -365,7 +427,76 @@
             document.getElementById('grand-total').innerText = (subtotal + deliveryFee) + ' ฿';
         }
 
-        // ฟังก์ชันสร้างรูปใบเสร็จ PNG เหมือนเดิม
+        // ✨ ⚙️ ระบบถอดรหัสข้อความสั่งซื้ออัตโนมัติ (Auto Parser)
+        function parseAutoOrder() {
+            const text = document.getElementById('auto-paste-area').value;
+            if (!text.trim()) {
+                alert('กรุณาวางข้อความสั่งซื้อของลูกค้าก่อนครับ 😊');
+                return;
+            }
+            
+            cart = {};
+            cartSauces = {};
+            
+            const lines = text.split('\n');
+            let custName = '';
+            let custPhone = '';
+            let custNote = '';
+            
+            lines.forEach(line => {
+                line = line.trim();
+                if (line.includes('ชื่อลูกค้า:')) {
+                    custName = line.split('ชื่อลูกค้า:')[1].trim();
+                } else if (line.includes('เบอร์โทร:')) {
+                    custPhone = line.split('เบอร์โทร:')[1].trim();
+                } else if (line.includes('หมายเหตุ:')) {
+                    custNote = line.split('หมายเหตุ:')[1].trim();
+                } else if (line.startsWith('-')) {
+                    const parts = line.split(/\s+x\s+/);
+                    if (parts.length >= 2) {
+                        const leftPart = parts[0].replace(/^-\s*/, '').trim(); 
+                        const rightPart = parts[1].trim(); 
+                        
+                        let matchedId = null;
+                        for (const id in itemDictionary) {
+                            if (leftPart.includes(itemDictionary[id].name)) {
+                                matchedId = id;
+                                break;
+                            }
+                        }
+                        
+                        if (matchedId) {
+                            const qtyMatch = rightPart.match(/^(\d+)/);
+                            if (qtyMatch) {
+                                const qty = parseInt(qtyMatch[1]);
+                                cart[matchedId] = qty;
+                                
+                                const sauceMatch = rightPart.match(/\((.*)\)/);
+                                if (sauceMatch && checkFruitSauceEligibility(itemDictionary[matchedId].name)) {
+                                    const sauces = sauceMatch[1].split(/,\s+/);
+                                    cartSauces[matchedId] = [];
+                                    for(let i=0; i<qty; i++) {
+                                        let s = sauces[i] ? sauces[i].trim() : "พริกเกลือนัวร์ (ฟรี)";
+                                        s = s.replace(/\s*\*ไม่ฟรี/, '');
+                                        cartSauces[matchedId].push(s);
+                                    }
+                                } else if (checkFruitSauceEligibility(itemDictionary[matchedId].name)) {
+                                    cartSauces[matchedId] = Array(qty).fill("พริกเกลือนัวร์ (ฟรี)");
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            document.getElementById('customer-info').value = (custName + ' ' + custPhone).trim() || 'ลูกค้าทั่วไป';
+            document.getElementById('order-note').value = custNote;
+            
+            renderCart();
+            alert('✨ ดึงข้อมูลและน้ำจิ้มลงบิลอัตโนมัติสำเร็จแล้วครับ!');
+            document.getElementById('auto-paste-area').value = ''; 
+        }
+
         function generateReceiptImage() {
             if(Object.keys(cart).length === 0) {
                 alert('กรุณาเพิ่มสินค้าลงตะกร้าก่อนสร้างใบเสร็จ');
@@ -404,9 +535,14 @@
                 const total = qty * item.price;
                 subtotal += total;
 
+                let sauceLine = '';
+                if (cartSauces[id] && cartSauces[id].length > 0) {
+                    sauceLine = `<br><small style="color:#555; font-style:italic;">(${cartSauces[id].join(', ')})</small>`;
+                }
+
                 rItems.innerHTML += `
                     <tr>
-                        <td style="padding-right: 5px;">${item.name}</td>
+                        <td style="padding-right: 5px; line-height:1.2;">${item.name}${sauceLine}</td>
                         <td class="center">x${qty}</td>
                         <td class="right">${total}</td>
                     </tr>
