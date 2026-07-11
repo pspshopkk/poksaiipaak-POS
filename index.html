@@ -18,6 +18,7 @@
             --success: #2ECC71;
             --success-dark: #27AE60;
             --danger: #E74C3C;
+            --danger-dark: #C0392B;
             --accent-blue: #3498DB;
             
             /* หมวดหมู่สีสำหรับจำแนกหัวข้อ */
@@ -50,7 +51,6 @@
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03); 
         }
         
-        /* ตะกร้าสินค้าฝั่งขวา (Desktop) */
         .cart-section { 
             flex: 1.2; 
             background: var(--white); 
@@ -224,6 +224,27 @@
         .total-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 14px; color: var(--text-muted);}
         .total-row.grand { font-size: 22px; font-weight: 700; color: var(--primary-dark); margin-top: 10px;}
         
+        /* 🛠️ ปุ่มล้างข้อมูลแบบพรีเมียม (สีแดงซอฟต์โทน) */
+        .btn-clear {
+            width: 100%;
+            padding: 10px;
+            background: #FFF5F5;
+            color: var(--danger);
+            border: 1px solid #FEB2B2;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: 'Sarabun';
+            margin-bottom: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .btn-clear:hover {
+            background: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+
         /* ปุ่มออกใบเสร็จแบบคงที่ */
         .btn-print { 
             width: 100%; 
@@ -237,44 +258,19 @@
             font-weight: 700; 
             font-family: 'Sarabun'; 
             box-shadow: 0 4px 12px rgba(39, 174, 96, 0.2); 
-            margin-top: auto; 
             transition: background 0.2s;
         }
         .btn-print:hover { background: #1E7E34; }
 
-        /* ==========================================
-           📱 RESPONSIVE CODE (ปรับแต่งหน้าจอสำหรับมือถือ)
-           ========================================== */
+        /* Responsive สำหรับมือถือ */
         @media (max-width: 992px) {
-            body {
-                padding: 12px; /* ลดขอบหน้าจอลงเพื่อให้มีพื้นที่แสดงผลมากขึ้น */
-            }
-            .container {
-                flex-direction: column; /* เปลี่ยนเลย์เอาท์ขวา-ซ้าย ให้เรียงต่อกันเป็น บน-ล่าง */
-                gap: 16px;
-            }
-            .menu-section, .cart-section {
-                flex: none;
-                width: 100%;
-                box-sizing: border-box;
-                padding: 16px;
-            }
-            .cart-section {
-                position: static; /* ยกเลิกการดึงหมุดตรึงหน้าจอ เพื่อให้เลื่อนดูตามปกติ */
-                max-height: none;
-                overflow: visible;
-            }
-            .cart-body {
-                max-height: 520px; /* ล็อคความสูงของโซนกรอกบิลบนมือถือ สกรอลล์ในกล่องนี้ได้ ไม่ยาวไหลจนหาปุ่มพิมพ์บิลไม่เจอ */
-                overflow-y: auto;
-                padding-right: 4px;
-            }
-            .menu-item {
-                padding: 14px 6px; /* เพิ่มพื้นที่สัมผัสปุ่มในมือถือให้จิ้มเลือกง่ายขึ้น */
-            }
-            .btn-add {
-                padding: 10px 16px; /* ขยายขนาดปุ่มเพิ่มให้ใช้นิ้วกดง่ายขึ้น */
-            }
+            body { padding: 12px; }
+            .container { flex-direction: column; gap: 16px; }
+            .menu-section, .cart-section { flex: none; width: 100%; box-sizing: border-box; padding: 16px; }
+            .cart-section { position: static; max-height: none; overflow: visible; }
+            .cart-body { max-height: 520px; overflow-y: auto; padding-right: 4px; }
+            .menu-item { padding: 14px 6px; }
+            .btn-add { padding: 10px 16px; }
         }
 
         /* ใบเสร็จสำหรับการ Capture */
@@ -360,7 +356,8 @@
                         <span id="grand-total">0 ฿</span>
                     </div>
                 </div>
-            </div> <button class="btn-print" id="btn-download" onclick="generateReceiptImage()">ออกใบเสร็จเป็นรูปภาพ (PNG 56mm)</button>
+            </div> <button class="btn-clear" onclick="clearOrder()">ล้างข้อมูล / เริ่มออเดอร์ใหม่</button>
+            <button class="btn-print" id="btn-download" onclick="generateReceiptImage()">ออกใบเสร็จเป็นรูปภาพ (PNG 56mm)</button>
         </div>
     </div>
 
@@ -596,6 +593,28 @@
             document.getElementById('subtotal').innerText = subtotal + ' ฿';
             document.getElementById('del-fee').innerText = deliveryFee + ' ฿';
             document.getElementById('grand-total').innerText = (subtotal + deliveryFee) + ' ฿';
+        }
+
+        /* 🛠️ ฟังก์ชันสำหรับล้างข้อมูลออเดอร์ทั้งหมดเพื่อเริ่มบิลใหม่ */
+        function clearOrder() {
+            // เช็กก่อนว่ามีข้อมูลให้ล้างไหม ถ้าว่างเปล่าอยู่แล้วก็ไม่ต้องกดอะไร
+            if (Object.keys(cart).length === 0 && 
+                !document.getElementById('customer-info').value.trim() && 
+                !document.getElementById('order-note').value.trim() && 
+                !document.getElementById('auto-paste-area').value.trim()) {
+                return;
+            }
+            
+            // แสดงกล่องแจ้งเตือนเพื่อยืนยัน ป้องกันมือลั่นไปโดน
+            if (confirm('คุณต้องการล้างข้อมูลในหน้านี้ทั้งหมด เพื่อเริ่มคำสั่งซื้อใหม่ใช่หรือไม่?')) {
+                cart = {};
+                cartSauces = {};
+                document.getElementById('customer-info').value = '';
+                document.getElementById('order-note').value = '';
+                document.getElementById('auto-paste-area').value = '';
+                setDelivery(0); // รีเซ็ตค่าส่งเป็นฟรี/รับเอง
+                renderCart(); // รีเฟรชหน้าตะกร้าใหม่
+            }
         }
 
         function parseAutoOrder() {
