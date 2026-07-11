@@ -50,7 +50,7 @@
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03); 
         }
         
-        /* ล็อคขอบเขตฝั่งตะกร้าสินค้าไม่ให้แตกแถว */
+        /* ตะกร้าสินค้าฝั่งขวา (Desktop) */
         .cart-section { 
             flex: 1.2; 
             background: var(--white); 
@@ -62,7 +62,7 @@
             position: sticky; 
             top: 24px; 
             max-height: calc(100vh - 48px); 
-            overflow: hidden; /* เปลี่ยนเป็น hidden เพื่อบังคับให้สกรอลล์เฉพาะด้านใน */
+            overflow: hidden; 
         }
         
         h2 { 
@@ -75,12 +75,12 @@
             margin-bottom: 16px;
         }
         
-        /* 🛠️ กล่องหุ้มเนื้อหาภายในตะกร้าที่เปิดให้สกรอลล์ได้ โดยไม่กระทบกับปุ่มกดด้านล่าง */
+        /* กล่องหุ้มเนื้อหาภายในตะกร้าที่เปิดให้สกรอลล์ได้ */
         .cart-body {
             flex: 1;
             overflow-y: auto;
             margin-bottom: 16px;
-            padding-right: 6px; /* เว้นพื้นที่ให้แถบสกรอลล์ไม่เบียดเนื้อหา */
+            padding-right: 6px; 
         }
         
         /* กล่อง Auto Paste */
@@ -176,7 +176,6 @@
             padding: 12px; 
             border-radius: 8px; 
             background: #F8FAFC;
-            /* นำระบบสกรอลล์ชั้นนี้ออก เพื่อให้เนื้อหาขยายตัวลื่นไหลไปกับกล่องใหญ่ด้านบน */
         }
         .cart-item { display: flex; flex-direction: column; margin-bottom: 14px; font-size: 14px; border-bottom: 1px solid var(--border); padding-bottom: 12px;}
         .cart-item-main { display: flex; justify-content: space-between; align-items: center; width: 100%; }
@@ -199,7 +198,7 @@
         .form-group label { display: block; font-size: 14px; margin-bottom: 6px; font-weight: 600; color: var(--text-main);}
         .form-group input { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: 'Sarabun'; box-sizing: border-box; font-size: 14px;}
         
-        /* ปุ่มเลือกช่องทาง สีเอกลักษณ์แบรนด์ชัดเจน */
+        /* ปุ่มเลือกช่องทาง */
         .delivery-btns { display: flex; gap: 6px; margin-bottom: 10px; }
         .delivery-btns button { 
             flex: 1; 
@@ -225,7 +224,7 @@
         .total-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 14px; color: var(--text-muted);}
         .total-row.grand { font-size: 22px; font-weight: 700; color: var(--primary-dark); margin-top: 10px;}
         
-        /* ปุ่มออกใบเสร็จแบบคงที่ ล็อคตำแหน่งให้อยู่ท้ายสุดของกล่องเสมอ */
+        /* ปุ่มออกใบเสร็จแบบคงที่ */
         .btn-print { 
             width: 100%; 
             padding: 14px; 
@@ -238,10 +237,45 @@
             font-weight: 700; 
             font-family: 'Sarabun'; 
             box-shadow: 0 4px 12px rgba(39, 174, 96, 0.2); 
-            margin-top: auto; /* ดันปุ่มลงล่างสุด */
+            margin-top: auto; 
             transition: background 0.2s;
         }
         .btn-print:hover { background: #1E7E34; }
+
+        /* ==========================================
+           📱 RESPONSIVE CODE (ปรับแต่งหน้าจอสำหรับมือถือ)
+           ========================================== */
+        @media (max-width: 992px) {
+            body {
+                padding: 12px; /* ลดขอบหน้าจอลงเพื่อให้มีพื้นที่แสดงผลมากขึ้น */
+            }
+            .container {
+                flex-direction: column; /* เปลี่ยนเลย์เอาท์ขวา-ซ้าย ให้เรียงต่อกันเป็น บน-ล่าง */
+                gap: 16px;
+            }
+            .menu-section, .cart-section {
+                flex: none;
+                width: 100%;
+                box-sizing: border-box;
+                padding: 16px;
+            }
+            .cart-section {
+                position: static; /* ยกเลิกการดึงหมุดตรึงหน้าจอ เพื่อให้เลื่อนดูตามปกติ */
+                max-height: none;
+                overflow: visible;
+            }
+            .cart-body {
+                max-height: 520px; /* ล็อคความสูงของโซนกรอกบิลบนมือถือ สกรอลล์ในกล่องนี้ได้ ไม่ยาวไหลจนหาปุ่มพิมพ์บิลไม่เจอ */
+                overflow-y: auto;
+                padding-right: 4px;
+            }
+            .menu-item {
+                padding: 14px 6px; /* เพิ่มพื้นที่สัมผัสปุ่มในมือถือให้จิ้มเลือกง่ายขึ้น */
+            }
+            .btn-add {
+                padding: 10px 16px; /* ขยายขนาดปุ่มเพิ่มให้ใช้นิ้วกดง่ายขึ้น */
+            }
+        }
 
         /* ใบเสร็จสำหรับการ Capture */
         #receipt-container { position: fixed; left: -9999px; top: 0; background: white; z-index: -1; }
