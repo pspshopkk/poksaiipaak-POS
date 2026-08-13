@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>POS - ปอกใส่ปาก (ระบบจัดการหลังบ้าน)</title>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- ไลบรารีแปลงบิลเป็นรูปภาพ PNG -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
@@ -97,11 +98,10 @@
         .btn-print { width: 100%; padding: 12px; background: var(--success); color: white; font-size: 16px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-family: 'Sarabun'; box-shadow: 0 4px 6px rgba(39, 174, 96, 0.3); margin-top: auto;}
         .btn-print:hover { background: #219a52; }
 
-        /* 📸 ป๊อปอัพแสดงใบเสร็จสำหรับมือถือ */
+        /* ป๊อปอัพสำรองภายในหน้าเดิมกรณีเปิดหน้าใหม่ไม่ได้ */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 9999; padding: 15px; }
         .modal-content { background: white; padding: 20px; border-radius: 12px; width: 100%; max-width: 380px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); text-align: center; }
 
-        /* 🛠️ ปรับการซ่อนใบเสร็จต้นฉบับไม่ให้ไกลเกินไปเพื่อให้มือถือเรนเดอร์ได้ */
         #receipt-container {
             position: absolute;
             top: 0;
@@ -211,11 +211,11 @@
         </div>
     </div>
 
-    <!-- 📲 ป๊อปอัพแสดงผลรูปใบเสร็จบนมือถือ -->
+    <!-- ป๊อปอัพสำรอง -->
     <div class="modal-overlay" id="receipt-modal">
         <div class="modal-content">
             <h3 style="margin-top:0; color:var(--primary); font-size:18px;">📄 สรุปใบเสร็จรับเงิน</h3>
-            <p style="font-size:13px; color:#555; margin-bottom:10px;"><b>แตะค้างที่รูปภาพ</b> เพื่อบันทึกลงมือถือหรือกดคัดลอกส่งแชทได้เลยค่ะ</p>
+            <p style="font-size:13px; color:#555; margin-bottom:10px;"><b>แตะค้างที่รูปภาพ</b> เพื่อบันทึกลงมือถือได้เลยค่ะ</p>
             
             <div style="max-height: 60vh; overflow-y: auto; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; padding: 5px; background: #f0f0f0;">
                 <img id="receipt-result-img" src="" style="width: 100%; max-width: 230px; display: block; margin: 0 auto; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
@@ -516,8 +516,29 @@
             document.getElementById('auto-paste-area').value = ''; 
         }
 
+        // 🖨️ ปรับฟังก์ชันการเปิดรูปใบเสร็จเพื่อแก้ปัญหาป๊อปอัพโดนบล็อกในมือถือ
         function generateReceiptImage() {
             if(Object.keys(cart).length === 0) { alert('กรุณาเพิ่มสินค้าลงตะกร้าก่อนสร้างใบเสร็จ'); return; }
+
+            // 1. เปิดหน้าใหม่ทันทีขณะเกิด User Event (คลิก) ป้องกันไม่ให้มือถือบล็อกป๊อปอัพ
+            const receiptWindow = window.open('', '_blank');
+            if (receiptWindow) {
+                receiptWindow.document.write(`
+                    <html>
+                    <head>
+                        <title>กำลังสร้างใบเสร็จ...</title>
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <style>
+                            body { font-family: sans-serif; text-align: center; padding: 50px 20px; background: #fafafa; color: #333; }
+                            .loader { font-size: 18px; font-weight: bold; color: #d35400; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="loader">⏳ กำลังประมวลผลวาดใบเสร็จ...<br>กรุณารอสักครู่แป๊บเดียวนะคะ</div>
+                    </body>
+                    </html>
+                `);
+            }
 
             const btn = document.getElementById('btn-download');
             btn.innerText = 'กำลังสร้างใบเสร็จ...'; btn.disabled = true;
@@ -574,19 +595,28 @@
                     logging: false
                 }).then(canvas => {
                     const imgData = canvas.toDataURL("image/png");
-                    
-                    // 1. นำภาพไปแสดงในป๊อปอัพสำหรับเปิดในมือถือทันที
-                    document.getElementById('receipt-result-img').src = imgData;
-                    document.getElementById('receipt-modal').style.display = 'flex';
 
-                    // 2. พยายามกดดาวน์โหลดอัตโนมัติ (สำหรับระบบที่รองรับ เช่น คอมพิวเตอร์)
-                    try {
-                        const link = document.createElement('a');
-                        link.download = `Receipt_${Date.now()}.png`;
-                        link.href = imgData;
-                        link.click();
-                    } catch(e) {
-                        console.log("Auto download blocked, modal shown instead.");
+                    // 2. นำภาพใบเสร็จไปฉายในหน้าใหม่ที่เปิดเตรียมไว้
+                    if (receiptWindow && !receiptWindow.closed) {
+                        receiptWindow.document.body.innerHTML = `
+                            <style>
+                                @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap');
+                                body { font-family: 'Sarabun', sans-serif; text-align: center; padding: 20px 10px; background: #f4f4f4; margin: 0; color: #333; }
+                                .card { background: white; padding: 20px; border-radius: 12px; max-width: 380px; margin: 0 auto; box-shadow: 0 4px 15px rgba(0,0,0,0.1); box-sizing: border-box; }
+                                .hint { color: #d35400; font-weight: bold; margin-bottom: 15px; font-size: 15px; line-height: 1.5; background: #fff0d4; padding: 12px; border-radius: 8px; border: 1px dashed #d35400; }
+                                img { width: 100%; max-width: 240px; height: auto; border: 1px solid #ccc; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); display: block; margin: 0 auto; }
+                                .btn-close { margin-top: 20px; padding: 10px 25px; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; font-family: 'Sarabun'; background: #666; color: white; width: 100%; }
+                            </style>
+                            <div class="card">
+                                <div class="hint">📸 แตะค้างที่รูปภาพใบเสร็จด้านล่าง<br>เพื่อ "บันทึกรูป" หรือ "คัดลอกส่งแชท" ได้เลยค่ะ</div>
+                                <img src="${imgData}" alt="ใบเสร็จรับเงิน">
+                                <button class="btn-close" onclick="window.close()">❌ ปิดหน้านี้</button>
+                            </div>
+                        `;
+                    } else {
+                        // กรณีป๊อปอัพโดนบล็อก ให้ใช้ป๊อปอัพสำรองในหน้าเดิมแทน
+                        document.getElementById('receipt-result-img').src = imgData;
+                        document.getElementById('receipt-modal').style.display = 'flex';
                     }
 
                     btn.innerText = '🖨️ บันทึกใบเสร็จเป็นรูปภาพ (PNG 56mm)'; 
@@ -594,6 +624,7 @@
                 }).catch(err => {
                     console.error(err); 
                     alert("ไม่สามารถสร้างรูปภาพได้ กรุณาลองใหม่อีกครั้ง");
+                    if (receiptWindow) receiptWindow.close();
                     btn.innerText = '🖨️ บันทึกใบเสร็จเป็นรูปภาพ (PNG 56mm)'; 
                     btn.disabled = false;
                 });
