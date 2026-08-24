@@ -204,23 +204,26 @@
                 </div>
             </div>
 
-            <button class="btn-print" id="btn-download" onclick="generateReceiptImage()">🖨️ บันทึกใบเสร็จเป็นรูปภาพ (PNG 56mm)</button>
+            <button class="btn-print" id="btn-download" onclick="generateReceiptImage()">🖨️ บันทึกใบเสร็จเป็นรูปภาพ</button>
         </div>
     </div>
 
+    <!-- Modal สำรองในหน้าเดิม -->
     <div class="modal-overlay" id="receipt-modal">
         <div class="modal-content">
             <h3 style="margin-top:0; color:var(--primary); font-size:18px;">📄 สรุปใบเสร็จรับเงิน</h3>
-            <p style="font-size:13px; color:#555; margin-bottom:10px;"><b>แตะค้างที่รูปภาพ</b> เพื่อบันทึกลงมือถือได้เลยค่ะ</p>
+            <p style="font-size:13px; color:#555; margin-bottom:10px;"><b>แตะค้างที่รูปภาพ</b> หรือ <b>กดปุ่มดาวน์โหลด</b> ด้านล่างได้เลยค่ะ</p>
             
             <div style="max-height: 60vh; overflow-y: auto; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; padding: 5px; background: #f0f0f0;">
                 <img id="receipt-result-img" src="" style="width: 100%; max-width: 230px; display: block; margin: 0 auto; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
             </div>
-
+            
+            <div id="dl-btn-container"></div>
             <button style="background:#666; color:white; border:none; padding:10px 20px; border-radius:6px; font-weight:bold; width:100%; cursor:pointer; font-family:'Sarabun';" onclick="closeReceiptModal()">✖ ปิดหน้าต่าง</button>
         </div>
     </div>
 
+    <!-- ต้นฉบับใบเสร็จ -->
     <div id="receipt-container">
         <div id="receipt">
             <div class="r-header">
@@ -262,7 +265,8 @@
     </div>
 
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyaPiqWEQhgM7nxSTDj67DU_8TsWVu36aJNLagaQ33OBRKGErUyiA2x3M9YiMF7kuvL/exec'; 
+        // ⚠️ อย่าลืมอัปเดตลิงก์นี้ให้เป็นลิงก์ Apps Script ของคุณ
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbySR3Hl_mtRzQgChrKoWOwBmE8Jp7Tbw_qEHSYYagsEsxYln9_9S3zXLHvzeenLB0Hl/exec'; 
 
         let menuData = [];
         let itemDictionary = {};
@@ -557,6 +561,15 @@
             const now = new Date();
             const timeStr = now.toLocaleDateString('th-TH') + ' ' + now.toLocaleTimeString('th-TH').substring(0,5) + ' น.';
             
+            // สร้างชื่อไฟล์อัตโนมัติ (เช่น Receipt_20260824_171825.png)
+            const yy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
+            const hh = String(now.getHours()).padStart(2, '0');
+            const mins = String(now.getMinutes()).padStart(2, '0');
+            const secs = String(now.getSeconds()).padStart(2, '0');
+            const fileName = `Receipt_${yy}${mm}${dd}_${hh}${mins}${secs}.png`;
+
             const customer = document.getElementById('customer-info').value.trim() || 'ลูกค้าทั่วไป';
             const note = document.getElementById('order-note').value.trim();
 
@@ -607,6 +620,9 @@
                 }).then(canvas => {
                     const imgData = canvas.toDataURL("image/png");
 
+                    // ⬇️ สร้างปุ่มดาวน์โหลดเพื่อให้บังคับชื่อไฟล์ได้
+                    const dlBtnHtml = `<a href="${imgData}" download="${fileName}" style="background:#27ae60; color:white; padding:12px; border-radius:6px; display:block; text-decoration:none; font-weight:bold; margin-top:15px; margin-bottom:15px; font-family:'Sarabun'; width:100%; box-sizing:border-box;">⬇️ ดาวน์โหลดรูปภาพ (${fileName})</a>`;
+
                     if (receiptWindow && !receiptWindow.closed) {
                         receiptWindow.document.body.innerHTML = `
                             <style>
@@ -615,26 +631,28 @@
                                 .card { background: white; padding: 20px; border-radius: 12px; max-width: 380px; margin: 0 auto; box-shadow: 0 4px 15px rgba(0,0,0,0.1); box-sizing: border-box; }
                                 .hint { color: #d35400; font-weight: bold; margin-bottom: 15px; font-size: 15px; line-height: 1.5; background: #fff0d4; padding: 12px; border-radius: 8px; border: 1px dashed #d35400; }
                                 img { width: 100%; max-width: 240px; height: auto; border: 1px solid #ccc; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); display: block; margin: 0 auto; }
-                                .btn-close { margin-top: 20px; padding: 10px 25px; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; font-family: 'Sarabun'; background: #666; color: white; width: 100%; }
+                                .btn-close { margin-top: 10px; padding: 10px 25px; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; font-family: 'Sarabun'; background: #666; color: white; width: 100%; }
                             </style>
                             <div class="card">
-                                <div class="hint">📸 แตะค้างที่รูปภาพใบเสร็จด้านล่าง<br>เพื่อ "บันทึกรูป" หรือ "คัดลอกส่งแชท" ได้เลยค่ะ</div>
+                                <div class="hint">ออกใบเสร็จ</div>
                                 <img src="${imgData}" alt="ใบเสร็จรับเงิน">
+                                ${dlBtnHtml}
                                 <button class="btn-close" onclick="window.close()">❌ ปิดหน้านี้</button>
                             </div>
                         `;
                     } else {
                         document.getElementById('receipt-result-img').src = imgData;
+                        document.getElementById('dl-btn-container').innerHTML = dlBtnHtml;
                         document.getElementById('receipt-modal').style.display = 'flex';
                     }
 
-                    btn.innerText = '🖨️ บันทึกใบเสร็จเป็นรูปภาพ (PNG 56mm)'; 
+                    btn.innerText = '🖨️ บันทึกใบเสร็จเป็นรูปภาพ'; 
                     btn.disabled = false;
                 }).catch(err => {
                     console.error(err); 
                     alert("ไม่สามารถสร้างรูปภาพได้ กรุณาลองใหม่อีกครั้ง");
                     if (receiptWindow) receiptWindow.close();
-                    btn.innerText = '🖨️ บันทึกใบเสร็จเป็นรูปภาพ (PNG 56mm)'; 
+                    btn.innerText = '🖨️ บันทึกใบเสร็จเป็นรูปภาพ'; 
                     btn.disabled = false;
                 });
             }, 300);
