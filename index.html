@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>POS - ปอกใส่ปาก (ระบบจัดการหลังบ้าน)</title>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <!-- ไลบรารีแปลงบิลเป็นรูปภาพ PNG -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
@@ -16,6 +15,7 @@
             --success: #27ae60;
             --danger: #e74c3c;
             --accent-blue: #0084FF;
+            --purple-service: #8e44ad;
         }
         body {
             font-family: 'Sarabun', sans-serif;
@@ -60,6 +60,7 @@
 
         .category-title { background: #fdf2e9; padding: 8px 10px; border-radius: 5px; margin: 20px 0 10px 0; font-weight: 600; color: var(--primary); font-size: 18px; }
         .cat-dip { background: #fff0d4; color: #d35400; }
+        .cat-service { background: #f4ecf7; color: var(--purple-service); }
         
         .menu-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px dashed var(--border); transition: 0.2s; }
         .menu-item:hover { background: #fdfdfd; }
@@ -98,7 +99,6 @@
         .btn-print { width: 100%; padding: 12px; background: var(--success); color: white; font-size: 16px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-family: 'Sarabun'; box-shadow: 0 4px 6px rgba(39, 174, 96, 0.3); margin-top: auto;}
         .btn-print:hover { background: #219a52; }
 
-        /* ป๊อปอัพสำรองภายในหน้าเดิมกรณีเปิดหน้าใหม่ไม่ได้ */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 9999; padding: 15px; }
         .modal-content { background: white; padding: 20px; border-radius: 12px; width: 100%; max-width: 380px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); text-align: center; }
 
@@ -141,7 +141,6 @@
 <body>
 
     <div class="container">
-        <!-- เมนูผลไม้ฝั่งซ้าย -->
         <div class="menu-section">
             <h2>📦 ระบบจัดการออเดอร์หน้าร้าน (POS)</h2>
             <div id="menu-container">
@@ -149,7 +148,6 @@
             </div>
         </div>
 
-        <!-- รายการสั่งซื้อฝั่งขวา -->
         <div class="cart-section">
             <h2>🛒 รายการสั่งซื้อ</h2>
             
@@ -179,7 +177,6 @@
             </div>
 
             <div class="cart-list" id="cart-list">
-                <!-- สินค้าในตะกร้าจะแสดงที่นี่ -->
             </div>
 
             <div class="form-group">
@@ -211,7 +208,6 @@
         </div>
     </div>
 
-    <!-- ป๊อปอัพสำรอง -->
     <div class="modal-overlay" id="receipt-modal">
         <div class="modal-content">
             <h3 style="margin-top:0; color:var(--primary); font-size:18px;">📄 สรุปใบเสร็จรับเงิน</h3>
@@ -225,7 +221,6 @@
         </div>
     </div>
 
-    <!-- ส่วนใบเสร็จซ่อนอยู่หลังบ้าน -->
     <div id="receipt-container">
         <div id="receipt">
             <div class="r-header">
@@ -283,6 +278,11 @@
             btn.classList.add('active');
         }
 
+        function isServiceItem(item) {
+            const catStr = String(item.category || '').toLowerCase();
+            return catStr.includes('บริการ') || catStr === 'service' || catStr === 'addon';
+        }
+
         function checkFruitSauceEligibility(itemName) {
             if (itemName.includes('ฝรั่งแช่บ๊วย')) return false;
             return itemName.includes('มะม่วง') || itemName.includes('สับปะรด') || itemName.includes('แอปเปิ้ล') || itemName.includes('ฝรั่ง');
@@ -304,31 +304,44 @@
             container.innerHTML = '';
 
             const standardCats = [...new Set(menuData.map(item => Number(item.category)))]
-                .filter(cat => cat >= 40 && cat <= 100)
+                .filter(cat => !isNaN(cat) && cat >= 40 && cat <= 100)
                 .sort((a, b) => a - b);
 
             standardCats.forEach(cat => {
-                const items = menuData.filter(item => Number(item.category) === cat);
+                const items = menuData.filter(item => Number(item.category) === cat && !isServiceItem(item));
                 if (items.length > 0) {
-                    createCategoryBlock(`🍓 ---- กล่องละ ${cat}฿ ---- 🍓`, items, false);
+                    createCategoryBlock(`🍓 ---- กล่องละ ${cat}฿ ---- 🍓`, items, 'fruit');
                 }
             });
 
-            const premiumItems = menuData.filter(item => Number(item.category) > 100);
+            const premiumItems = menuData.filter(item => !isNaN(Number(item.category)) && Number(item.category) > 100 && !isServiceItem(item));
             if (premiumItems.length > 0) {
-                createCategoryBlock(`✨ ---- ผลไม้พรีเมียม ---- ✨`, premiumItems, false);
+                createCategoryBlock(`✨ ---- ผลไม้พรีเมียม ---- ✨`, premiumItems, 'fruit');
             }
 
-            const dipItems = menuData.filter(item => Number(item.category) < 40);
+            const serviceItems = menuData.filter(item => isServiceItem(item));
+            if (serviceItems.length > 0) {
+                createCategoryBlock(`🎀 ---- บริการเสริม / แพ็กเกจของขวัญ ---- 🎀`, serviceItems, 'service');
+            }
+
+            const dipItems = menuData.filter(item => !isNaN(Number(item.category)) && Number(item.category) < 40 && !isServiceItem(item));
             if (dipItems.length > 0) {
-                createCategoryBlock(`🥣 ---- ตัวเลือกน้ำจิ้ม / พริกเกลือ ---- 🥣`, dipItems, true);
+                createCategoryBlock(`🥣 ---- ตัวเลือกน้ำจิ้ม / พริกเกลือ ---- 🥣`, dipItems, 'dip');
             }
         }
 
-        function createCategoryBlock(title, items, isDip) {
+        function createCategoryBlock(title, items, type) {
             const container = document.getElementById('menu-container');
             const catTitle = document.createElement('div');
-            catTitle.className = isDip ? 'category-title cat-dip' : 'category-title';
+            
+            if (type === 'dip') {
+                catTitle.className = 'category-title cat-dip';
+            } else if (type === 'service') {
+                catTitle.className = 'category-title cat-service';
+            } else {
+                catTitle.className = 'category-title';
+            }
+            
             catTitle.innerText = title;
             container.appendChild(catTitle);
 
@@ -356,7 +369,7 @@
             if(!cart[id]) cart[id] = 0;
             cart[id]++;
 
-            if (checkFruitSauceEligibility(itemDictionary[id].name)) {
+            if (!isServiceItem(itemDictionary[id]) && checkFruitSauceEligibility(itemDictionary[id].name)) {
                 if (!cartSauces[id]) cartSauces[id] = [];
                 cartSauces[id].push("พริกเกลือนัวร์ (ฟรี)");
             }
@@ -407,7 +420,7 @@
                 subtotal += totalItem;
 
                 let sauceSelectorHTML = '';
-                if (checkFruitSauceEligibility(item.name) && qty > 0) {
+                if (!isServiceItem(item) && checkFruitSauceEligibility(item.name) && qty > 0) {
                     sauceSelectorHTML = `<div class="cart-sauce-row">`;
                     for(let i=0; i<qty; i++) {
                         if(!cartSauces[id]) cartSauces[id] = [];
@@ -492,7 +505,7 @@
                                 cart[matchedId] = qty;
                                 
                                 const sauceMatch = rightPart.match(/\((.*)\)/);
-                                if (sauceMatch && checkFruitSauceEligibility(itemDictionary[matchedId].name)) {
+                                if (sauceMatch && !isServiceItem(itemDictionary[matchedId]) && checkFruitSauceEligibility(itemDictionary[matchedId].name)) {
                                     const sauces = sauceMatch[1].split(/,\s+/);
                                     cartSauces[matchedId] = [];
                                     for(let i=0; i<qty; i++) {
@@ -500,7 +513,7 @@
                                         s = s.replace(/\s*\*ไม่ฟรี/, '');
                                         cartSauces[matchedId].push(s);
                                     }
-                                } else if (checkFruitSauceEligibility(itemDictionary[matchedId].name)) {
+                                } else if (!isServiceItem(itemDictionary[matchedId]) && checkFruitSauceEligibility(itemDictionary[matchedId].name)) {
                                     cartSauces[matchedId] = Array(qty).fill("พริกเกลือนัวร์ (ฟรี)");
                                 }
                             }
@@ -516,11 +529,9 @@
             document.getElementById('auto-paste-area').value = ''; 
         }
 
-        // 🖨️ ปรับฟังก์ชันการเปิดรูปใบเสร็จเพื่อแก้ปัญหาป๊อปอัพโดนบล็อกในมือถือ
         function generateReceiptImage() {
             if(Object.keys(cart).length === 0) { alert('กรุณาเพิ่มสินค้าลงตะกร้าก่อนสร้างใบเสร็จ'); return; }
 
-            // 1. เปิดหน้าใหม่ทันทีขณะเกิด User Event (คลิก) ป้องกันไม่ให้มือถือบล็อกป๊อปอัพ
             const receiptWindow = window.open('', '_blank');
             if (receiptWindow) {
                 receiptWindow.document.write(`
@@ -596,7 +607,6 @@
                 }).then(canvas => {
                     const imgData = canvas.toDataURL("image/png");
 
-                    // 2. นำภาพใบเสร็จไปฉายในหน้าใหม่ที่เปิดเตรียมไว้
                     if (receiptWindow && !receiptWindow.closed) {
                         receiptWindow.document.body.innerHTML = `
                             <style>
@@ -614,7 +624,6 @@
                             </div>
                         `;
                     } else {
-                        // กรณีป๊อปอัพโดนบล็อก ให้ใช้ป๊อปอัพสำรองในหน้าเดิมแทน
                         document.getElementById('receipt-result-img').src = imgData;
                         document.getElementById('receipt-modal').style.display = 'flex';
                     }
