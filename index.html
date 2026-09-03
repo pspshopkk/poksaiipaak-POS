@@ -85,8 +85,8 @@
         .cart-sauce-select { padding: 3px; border-radius: 4px; border: 1px solid #ccc; font-family: 'Sarabun'; font-size: 12px; width: 100%; margin-top: 2px;}
 
         .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; font-size: 14px; margin-bottom: 4px; font-weight: 600;}
-        .form-group input { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 4px; font-family: 'Sarabun'; box-sizing: border-box; font-size: 14px;}
+        .form-group label { display: block; font-size: 13px; margin-bottom: 4px; font-weight: 600;}
+        .form-group input, .form-group textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 4px; font-family: 'Sarabun'; box-sizing: border-box; font-size: 14px;}
         
         .delivery-btns { display: flex; gap: 5px; margin-bottom: 10px; }
         .delivery-btns button { flex: 1; padding: 6px 0; border: 1px solid var(--primary); background: white; color: var(--primary); border-radius: 4px; cursor: pointer; font-family: 'Sarabun'; font-weight: 500; font-size: 13px;}
@@ -125,6 +125,7 @@
         .r-header { text-align: center; border-bottom: 1px dashed black; padding-bottom: 5px; margin-bottom: 5px; }
         .r-title { font-size: 15px; font-weight: bold; margin: 0; }
         .r-info { margin: 2px 0; font-size: 11px; }
+        .r-address-print { font-size: 11px; margin: 3px 0; word-break: break-word; text-align: left; background: #fafafa; padding: 3px; border-radius: 3px;}
         .r-note-print { margin: 5px 0; font-size: 12px; font-weight: bold; color: #d35400; border: 1px dashed #ccc; padding: 3px; display: none; }
         
         .r-table { width: 100%; border-collapse: collapse; margin-bottom: 5px; font-size: 11px;}
@@ -141,6 +142,7 @@
 <body>
 
     <div class="container">
+        <!-- ฝั่งเมนูผลไม้ -->
         <div class="menu-section">
             <h2>📦 ระบบจัดการออเดอร์หน้าร้าน (POS)</h2>
             <div id="menu-container">
@@ -148,6 +150,7 @@
             </div>
         </div>
 
+        <!-- ฝั่งตะกร้าและข้อมูลลูกค้า -->
         <div class="cart-section">
             <h2>🛒 รายการสั่งซื้อ</h2>
             
@@ -167,17 +170,28 @@
             </div>
             
             <div class="form-group">
-                <label>เบอร์ติดต่อ / ชื่อลูกค้า:</label>
-                <input type="text" id="customer-info" placeholder="เช่น 081-xxx-xxxx (คุณเอ)">
+                <label>📞 เบอร์โทรศัพท์ลูกค้า (พิมพ์เพื่อค้นหาลูกค้าเดิม):</label>
+                <input type="tel" id="customer-phone" list="customer-phone-list" placeholder="เช่น 081-xxx-xxxx" oninput="onCustomerInput('phone')">
+                <datalist id="customer-phone-list"></datalist>
+            </div>
+
+            <div class="form-group">
+                <label>👤 ชื่อลูกค้า:</label>
+                <input type="text" id="customer-name" list="customer-name-list" placeholder="ชื่อเล่น หรือชื่อจริง" oninput="onCustomerInput('name')">
+                <datalist id="customer-name-list"></datalist>
+            </div>
+
+            <div class="form-group">
+                <label>📍 สถานที่จัดส่ง (พิกัด / ที่อยู่ / ลิงก์ Maps):</label>
+                <textarea id="customer-address" rows="2" placeholder="บ้านเลขที่, ซอย, จุดสังเกต หรือวางลิงก์ Google Maps..."></textarea>
             </div>
             
             <div class="form-group">
-                <label>หมายเหตุพิเศษ (พิมพ์ระบุเอง):</label>
+                <label>📌 หมายเหตุพิเศษ (พิมพ์ระบุเอง):</label>
                 <input type="text" id="order-note" placeholder="เช่น จัดเซ็ตของขวัญ, ไม่รับช้อนส้อม, แยกพริกเกลือ">
             </div>
 
-            <div class="cart-list" id="cart-list">
-            </div>
+            <div class="cart-list" id="cart-list"></div>
 
             <div class="form-group">
                 <label>ค่าบริการจัดส่ง (บาท):</label>
@@ -204,7 +218,7 @@
                 </div>
             </div>
 
-            <button class="btn-print" id="btn-download" onclick="generateReceiptImage()">🖨️ออกใบเสร็จ</button>
+            <button class="btn-print" id="btn-download" onclick="generateReceiptImage()">🧾 ออกใบเสร็จ</button>
         </div>
     </div>
 
@@ -212,7 +226,7 @@
     <div class="modal-overlay" id="receipt-modal">
         <div class="modal-content">
             <h3 style="margin-top:0; color:var(--primary); font-size:18px;">📄 สรุปใบเสร็จรับเงิน</h3>
-            <p style="font-size:13px; color:#555; margin-bottom:10px;"><b>แตะค้างที่รูปภาพ</b> หรือ <b>กดปุ่มดาวน์โหลด</b> ด้านล่างได้เลยค่ะ</p>
+            <p style="font-size:13px; color:#555; margin-bottom:10px;"><b>แตะค้างที่รูปภาพ</b> หรือกดปุ่ม <b>บันทึกใบเสร็จ</b> ด้านล่างได้เลยค่ะ</p>
             
             <div style="max-height: 60vh; overflow-y: auto; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; padding: 5px; background: #f0f0f0;">
                 <img id="receipt-result-img" src="" style="width: 100%; max-width: 230px; display: block; margin: 0 auto; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
@@ -223,7 +237,7 @@
         </div>
     </div>
 
-    <!-- ต้นฉบับใบเสร็จ -->
+    <!-- ต้นฉบับใบเสร็จซ่อนหลังบ้าน -->
     <div id="receipt-container">
         <div id="receipt">
             <div class="r-header">
@@ -231,6 +245,7 @@
                 <p class="r-info" id="r-time"></p>
                 <p class="r-info" id="r-channel"></p>
                 <p class="r-info" id="r-customer"></p>
+                <p class="r-address-print" id="r-address"></p>
                 <p class="r-note-print" id="r-note"></p> 
             </div>
             <table class="r-table">
@@ -241,8 +256,7 @@
                         <th class="right" style="width: 40px;">ราคา</th>
                     </tr>
                 </thead>
-                <tbody id="r-items">
-                </tbody>
+                <tbody id="r-items"></tbody>
             </table>
             <div class="r-totals">
                 <div class="flex">
@@ -265,10 +279,14 @@
     </div>
 
     <script>
-        // ⚠️ อย่าลืมอัปเดตลิงก์นี้ให้เป็นลิงก์ Apps Script ของคุณ
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyaPiqWEQhgM7nxSTDj67DU_8TsWVu36aJNLagaQ33OBRKGErUyiA2x3M9YiMF7kuvL/exec'; 
+        // 🍉 1. ลิงก์ชีทเมนูผลไม้
+        const MENU_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyaPiqWEQhgM7nxSTDj67DU_8TsWVu36aJNLagaQ33OBRKGErUyiA2x3M9YiMF7kuvL/exec'; 
+
+        // 👥 2. ลิงก์ชีทฐานข้อมูลลูกค้า (ใส่ให้เรียบร้อยแล้วครับ)
+        const CUSTOMER_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzD6SlGLrhtwurz1MUbhwi9WVNFAVsMRfZdjQ8jFQVcG4meZyH5ztPzQnSX_u8sq2I6cA/exec'; 
 
         let menuData = [];
+        let customerList = [];
         let itemDictionary = {};
         let cart = {};
         let cartSauces = {}; 
@@ -292,14 +310,67 @@
             return itemName.includes('มะม่วง') || itemName.includes('สับปะรด') || itemName.includes('แอปเปิ้ล') || itemName.includes('ฝรั่ง');
         }
 
+        // โหลดเมนูและข้อมูลลูกค้าพร้อมกัน
         async function loadData() {
             try {
-                const response = await fetch(SCRIPT_URL + '?action=getData');
+                const response = await fetch(MENU_SCRIPT_URL + '?action=getData');
                 menuData = await response.json();
                 menuData.forEach(item => { itemDictionary[item.id] = item; });
                 renderMenu();
             } catch (error) {
                 document.getElementById('menu-container').innerHTML = '<div style="text-align:center; padding:20px; color:red;">โหลดข้อมูลไม่สำเร็จ กรุณารีเฟรชหน้าเว็บ</div>';
+            }
+
+            loadCustomers();
+        }
+
+        async function loadCustomers() {
+            if (!CUSTOMER_SCRIPT_URL) return;
+            try {
+                const response = await fetch(CUSTOMER_SCRIPT_URL);
+                customerList = await response.json();
+                updateCustomerDatalist();
+            } catch (e) {
+                console.warn('โหลดข้อมูลลูกค้าล่วงหน้าไม่สำเร็จ', e);
+            }
+        }
+
+        function updateCustomerDatalist() {
+            const phoneList = document.getElementById('customer-phone-list');
+            const nameList = document.getElementById('customer-name-list');
+            if (phoneList) {
+                phoneList.innerHTML = customerList.filter(c => c.phone).map(c => `<option value="${c.phone}">${c.name || ''}</option>`).join('');
+            }
+            if (nameList) {
+                nameList.innerHTML = customerList.filter(c => c.name).map(c => `<option value="${c.name}">${c.phone || ''}</option>`).join('');
+            }
+        }
+
+        // Auto-fill ดึงที่อยู่ลูกค้าเก่าเมื่อพิมพ์ชื่อหรือเบอร์
+        function onCustomerInput(type) {
+            const phoneVal = document.getElementById('customer-phone').value.trim();
+            const nameVal = document.getElementById('customer-name').value.trim();
+
+            if (type === 'phone' && phoneVal.length >= 8) {
+                const found = customerList.find(c => c.phone === phoneVal);
+                if (found) {
+                    if (found.name && !document.getElementById('customer-name').value) {
+                        document.getElementById('customer-name').value = found.name;
+                    }
+                    if (found.address && !document.getElementById('customer-address').value) {
+                        document.getElementById('customer-address').value = found.address;
+                    }
+                }
+            } else if (type === 'name' && nameVal.length >= 2) {
+                const found = customerList.find(c => c.name.toLowerCase() === nameVal.toLowerCase());
+                if (found) {
+                    if (found.phone && !document.getElementById('customer-phone').value) {
+                        document.getElementById('customer-phone').value = found.phone;
+                    }
+                    if (found.address && !document.getElementById('customer-address').value) {
+                        document.getElementById('customer-address').value = found.address;
+                    }
+                }
             }
         }
 
@@ -478,18 +549,20 @@
             document.getElementById('grand-total').innerText = (subtotal + deliveryFee) + ' ฿';
         }
 
+        // Auto Paste ดึงครบทั้งชื่อ เบอร์ ที่อยู่ และหมายเหตุ
         function parseAutoOrder() {
             const text = document.getElementById('auto-paste-area').value;
             if (!text.trim()) { alert('กรุณาวางข้อความสั่งซื้อของลูกค้าก่อนครับ 😊'); return; }
             
             cart = {}; cartSauces = {};
             const lines = text.split('\n');
-            let custName = ''; let custPhone = ''; let custNote = '';
+            let custName = ''; let custPhone = ''; let custAddress = ''; let custNote = '';
             
             lines.forEach(line => {
                 line = line.trim();
                 if (line.includes('ชื่อลูกค้า:')) { custName = line.split('ชื่อลูกค้า:')[1].trim(); }
                 else if (line.includes('เบอร์โทร:')) { custPhone = line.split('เบอร์โทร:')[1].trim(); }
+                else if (line.includes('สถานที่จัดส่ง:')) { custAddress = line.split('สถานที่จัดส่ง:')[1].trim(); }
                 else if (line.includes('หมายเหตุ:')) { custNote = line.split('หมายเหตุ:')[1].trim(); }
                 else if (line.startsWith('-')) {
                     const parts = line.split(/\s+x\s+/);
@@ -526,22 +599,58 @@
                 }
             });
             
-            document.getElementById('customer-info').value = (custName + ' ' + custPhone).trim() || 'ลูกค้าทั่วไป';
+            document.getElementById('customer-name').value = custName;
+            document.getElementById('customer-phone').value = custPhone;
+            document.getElementById('customer-address').value = custAddress;
             document.getElementById('order-note').value = custNote;
+
+            // ถ้าไม่มีที่อยู่ในข้อความ แต่เบอร์ตรงกับประวัติในชีทลูกค้า ให้ดึงที่อยู่เดิมมาใส่ให้อัตโนมัติ
+            if (!custAddress && (custPhone || custName)) {
+                const found = customerList.find(c => (custPhone && c.phone === custPhone) || (custName && c.name === custName));
+                if (found && found.address) {
+                    document.getElementById('customer-address').value = found.address;
+                }
+            }
+
             renderCart();
-            alert('✨ ดึงข้อมูลและน้ำจิ้มลงบิลอัตโนมัติสำเร็จแล้วครับ!');
+            alert('✨ ดึงข้อมูลลูกค้า ที่อยู่ และรายการสั่งซื้อเรียบร้อยแล้ว!');
             document.getElementById('auto-paste-area').value = ''; 
+        }
+
+        // สั่งบันทึกข้อมูลลูกค้าขึ้น Google Sheets ลูกค้า
+        function saveCustomerOnline(name, phone, address) {
+            if (!name && !phone) return;
+            if (!CUSTOMER_SCRIPT_URL) return;
+
+            const url = `${CUSTOMER_SCRIPT_URL}?action=save&name=${encodeURIComponent(name)}&phone=${encodeURIComponent(phone)}&address=${encodeURIComponent(address)}`;
+            fetch(url).then(r => r.json()).then(res => {
+                const idx = customerList.findIndex(c => (phone && c.phone === phone) || (name && c.name === name));
+                if (idx >= 0) {
+                    customerList[idx] = { name, phone, address };
+                } else {
+                    customerList.push({ name, phone, address });
+                }
+                updateCustomerDatalist();
+            }).catch(err => console.warn('บันทึกลูกค้าไม่สำเร็จ:', err));
         }
 
         function generateReceiptImage() {
             if(Object.keys(cart).length === 0) { alert('กรุณาเพิ่มสินค้าลงตะกร้าก่อนสร้างใบเสร็จ'); return; }
+
+            const custName = document.getElementById('customer-name').value.trim();
+            const custPhone = document.getElementById('customer-phone').value.trim();
+            const custAddress = document.getElementById('customer-address').value.trim();
+            const note = document.getElementById('order-note').value.trim();
+
+            // สั่งบันทึก/อัปเดตข้อมูลลูกค้าไปยัง Google Sheets ลูกค้าทันที
+            saveCustomerOnline(custName, custPhone, custAddress);
 
             const receiptWindow = window.open('', '_blank');
             if (receiptWindow) {
                 receiptWindow.document.write(`
                     <html>
                     <head>
-                        <title>กำลังสร้างใบเสร็จ...</title>
+                        <title>กำลังออกใบเสร็จ...</title>
                         <meta name="viewport" content="width=device-width, initial-scale=1.0">
                         <style>
                             body { font-family: sans-serif; text-align: center; padding: 50px 20px; background: #fafafa; color: #333; }
@@ -549,19 +658,18 @@
                         </style>
                     </head>
                     <body>
-                        <div class="loader">⏳ กำลังประมวลผลวาดใบเสร็จ...<br>กรุณารอสักครู่แป๊บเดียวนะคะ</div>
+                        <div class="loader">⏳ กำลังออกใบเสร็จ...<br>กรุณารอสักครู่แป๊บเดียวนะคะ</div>
                     </body>
                     </html>
                 `);
             }
 
             const btn = document.getElementById('btn-download');
-            btn.innerText = 'กำลังสร้างใบเสร็จ...'; btn.disabled = true;
+            btn.innerText = 'กำลังออกใบเสร็จ...'; btn.disabled = true;
             
             const now = new Date();
             const timeStr = now.toLocaleDateString('th-TH') + ' ' + now.toLocaleTimeString('th-TH').substring(0,5) + ' น.';
             
-            // สร้างชื่อไฟล์อัตโนมัติ (เช่น Receipt_20260824_171825.png)
             const yy = now.getFullYear();
             const mm = String(now.getMonth() + 1).padStart(2, '0');
             const dd = String(now.getDate()).padStart(2, '0');
@@ -570,13 +678,20 @@
             const secs = String(now.getSeconds()).padStart(2, '0');
             const fileName = `Receipt_${yy}${mm}${dd}_${hh}${mins}${secs}.png`;
 
-            const customer = document.getElementById('customer-info').value.trim() || 'ลูกค้าทั่วไป';
-            const note = document.getElementById('order-note').value.trim();
-
             document.getElementById('r-time').innerText = 'เวลารับออเดอร์ : ' + timeStr;
             document.getElementById('r-channel').innerText = 'ช่องทาง : ' + orderChannel; 
-            document.getElementById('r-customer').innerText = 'ติดต่อ : ' + customer;
             
+            const customerDisplay = (custName + (custPhone ? ' (' + custPhone + ')' : '')).trim() || 'ลูกค้าทั่วไป';
+            document.getElementById('r-customer').innerText = 'ลูกค้า : ' + customerDisplay;
+            
+            const rAddr = document.getElementById('r-address');
+            if (custAddress) {
+                rAddr.innerText = '📍 ที่อยู่ส่ง : ' + custAddress;
+                rAddr.style.display = 'block';
+            } else {
+                rAddr.style.display = 'none';
+            }
+
             const rNote = document.getElementById('r-note');
             if(note !== "") { rNote.innerText = '📌 หมายเหตุ: ' + note; rNote.style.display = 'block'; } 
             else { rNote.style.display = 'none'; }
@@ -619,9 +734,7 @@
                     logging: false
                 }).then(canvas => {
                     const imgData = canvas.toDataURL("image/png");
-
-                    // ⬇️ สร้างปุ่มดาวน์โหลดเพื่อให้บังคับชื่อไฟล์ได้
-                    const dlBtnHtml = `<a href="${imgData}" download="${fileName}" style="background:#27ae60; color:white; padding:12px; border-radius:6px; display:block; text-decoration:none; font-weight:bold; margin-top:15px; margin-bottom:15px; font-family:'Sarabun'; width:100%; box-sizing:border-box;">⬇️ ดาวน์โหลดรูปภาพ (${fileName})</a>`;
+                    const dlBtnHtml = `<a href="${imgData}" download="${fileName}" style="background:#27ae60; color:white; padding:12px; border-radius:6px; display:block; text-decoration:none; font-weight:bold; margin-top:15px; margin-bottom:15px; font-family:'Sarabun'; width:100%; box-sizing:border-box; font-size:15px;">💾 บันทึกใบเสร็จ</a>`;
 
                     if (receiptWindow && !receiptWindow.closed) {
                         receiptWindow.document.body.innerHTML = `
@@ -634,7 +747,7 @@
                                 .btn-close { margin-top: 10px; padding: 10px 25px; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; font-family: 'Sarabun'; background: #666; color: white; width: 100%; }
                             </style>
                             <div class="card">
-                                <div class="hint">บันทึกใบเสร็จ</div>
+                                <div class="hint">📸 แตะค้างที่รูปภาพใบเสร็จ<br>หรือกดปุ่ม <b>บันทึกใบเสร็จ</b> ด้านล่างได้เลยค่ะ</div>
                                 <img src="${imgData}" alt="ใบเสร็จรับเงิน">
                                 ${dlBtnHtml}
                                 <button class="btn-close" onclick="window.close()">❌ ปิดหน้านี้</button>
@@ -646,13 +759,13 @@
                         document.getElementById('receipt-modal').style.display = 'flex';
                     }
 
-                    btn.innerText = '🖨️ บันทึกใบเสร็จเป็นรูปภาพ'; 
+                    btn.innerText = '🧾 ออกใบเสร็จ'; 
                     btn.disabled = false;
                 }).catch(err => {
                     console.error(err); 
                     alert("ไม่สามารถสร้างรูปภาพได้ กรุณาลองใหม่อีกครั้ง");
                     if (receiptWindow) receiptWindow.close();
-                    btn.innerText = '🖨️ บันทึกใบเสร็จเป็นรูปภาพ'; 
+                    btn.innerText = '🧾 ออกใบเสร็จ'; 
                     btn.disabled = false;
                 });
             }, 300);
