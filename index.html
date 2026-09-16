@@ -95,6 +95,8 @@
         .form-group label { display: block; font-size: 13px; margin-bottom: 4px; font-weight: 600;}
         .form-group input, .form-group textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 4px; font-family: 'Sarabun'; font-size: 14px;}
         
+        .customer-status-badge { font-size: 12px; margin-top: 4px; min-height: 18px; font-weight: 500; transition: opacity 0.3s; }
+
         .delivery-btns { display: flex; gap: 5px; margin-bottom: 10px; }
         .delivery-btns button { flex: 1; padding: 6px 0; border: 1px solid var(--primary); background: white; color: var(--primary); border-radius: 4px; cursor: pointer; font-family: 'Sarabun'; font-weight: 500; font-size: 13px;}
         .delivery-btns button.active { background: var(--primary); color: white; }
@@ -166,7 +168,7 @@
                 <button type="button" class="btn-auto-parse" onclick="parseAutoOrder()">✨ โหลดข้อมูลออเดอร์อัตโนมัติ</button>
             </div>
 
-            <!-- กล่องเพิ่มรายการพิเศษนอกเมนู (แก้ปัญหาช่องล้นเรียบร้อย) -->
+            <!-- กล่องเพิ่มรายการพิเศษนอกเมนู -->
             <div class="custom-item-box">
                 <label style="display:block; font-size:13px; font-weight:bold; color:var(--primary); margin-bottom:5px;">➕ เพิ่มรายการพิเศษ (นอกเหนือเมนู):</label>
                 <div class="custom-item-row">
@@ -188,19 +190,20 @@
             
             <div class="form-group">
                 <label>📞 เบอร์โทรศัพท์ลูกค้า (พิมพ์เพื่อค้นหาลูกค้าเดิม):</label>
-                <input type="tel" id="customer-phone" list="customer-phone-list" placeholder="เช่น 081-xxx-xxxx" oninput="onCustomerInput('phone')">
+                <input type="tel" id="customer-phone" list="customer-phone-list" placeholder="เช่น 081-xxx-xxxx" oninput="onCustomerInput('phone')" onblur="triggerAutoSave()">
                 <datalist id="customer-phone-list"></datalist>
             </div>
 
             <div class="form-group">
                 <label>👤 ชื่อลูกค้า:</label>
-                <input type="text" id="customer-name" list="customer-name-list" placeholder="ชื่อเล่น หรือชื่อจริง" oninput="onCustomerInput('name')">
+                <input type="text" id="customer-name" list="customer-name-list" placeholder="ชื่อเล่น หรือชื่อจริง" oninput="onCustomerInput('name')" onblur="triggerAutoSave()">
                 <datalist id="customer-name-list"></datalist>
             </div>
 
             <div class="form-group">
                 <label>📍 สถานที่จัดส่ง (พิกัด / ที่อยู่ / ลิงก์ Maps):</label>
-                <textarea id="customer-address" rows="2" placeholder="บ้านเลขที่, ซอย, จุดสังเกต หรือวางลิงก์ Google Maps..."></textarea>
+                <textarea id="customer-address" rows="2" placeholder="บ้านเลขที่, ซอย, จุดสังเกต หรือวางลิงก์ Google Maps..." onblur="triggerAutoSave()"></textarea>
+                <div id="customer-save-status" class="customer-status-badge"></div>
             </div>
             
             <div class="form-group">
@@ -309,6 +312,7 @@
         let cartSauces = {}; 
         let deliveryFee = 0;
         let orderChannel = 'LINE'; 
+        let lastSavedData = '';
 
         function setChannel(channel, btn) {
             orderChannel = channel;
@@ -325,6 +329,10 @@
         function checkFruitSauceEligibility(itemName) {
             if (itemName.includes('ฝรั่งแช่บ๊วย')) return false;
             return itemName.includes('มะม่วง') || itemName.includes('สับปะรด') || itemName.includes('แอปเปิ้ล') || itemName.includes('ฝรั่ง');
+        }
+
+        function cleanPhone(p) {
+            return String(p || '').replace(/[^0-9]/g, '');
         }
 
         async function loadData() {
@@ -362,12 +370,14 @@
             }
         }
 
+        // ค้นหาลูกค้าเดิมและเติมข้อมูลให้อัตโนมัติ
         function onCustomerInput(type) {
             const phoneVal = document.getElementById('customer-phone').value.trim();
             const nameVal = document.getElementById('customer-name').value.trim();
+            const cleanInputPhone = cleanPhone(phoneVal);
 
-            if (type === 'phone' && phoneVal.length >= 8) {
-                const found = customerList.find(c => c.phone === phoneVal);
+            if (type === 'phone' && cleanInputPhone.length >= 8) {
+                const found = customerList.find(c => cleanPhone(c.phone) === cleanInputPhone);
                 if (found) {
                     if (found.name && !document.getElementById('customer-name').value) {
                         document.getElementById('customer-name').value = found.name;
@@ -375,6 +385,7 @@
                     if (found.address && !document.getElementById('customer-address').value) {
                         document.getElementById('customer-address').value = found.address;
                     }
+                    showSaveStatus('ℹ️ ลูกค้าเก่าในระบบ (พร้อมอัปเดตถ้ามีข้อมูลใหม่)', '#2980b9');
                 }
             } else if (type === 'name' && nameVal.length >= 2) {
                 const found = customerList.find(c => c.name.toLowerCase() === nameVal.toLowerCase());
@@ -385,8 +396,57 @@
                     if (found.address && !document.getElementById('customer-address').value) {
                         document.getElementById('customer-address').value = found.address;
                     }
+                    showSaveStatus('ℹ️ ลูกค้าเก่าในระบบ (พร้อมอัปเดตถ้ามีข้อมูลใหม่)', '#2980b9');
                 }
             }
+        }
+
+        function showSaveStatus(text, color) {
+            const badge = document.getElementById('customer-save-status');
+            if (badge) {
+                badge.innerText = text;
+                badge.style.color = color || '#27ae60';
+            }
+        }
+
+        // ระบบ Auto-Save บันทึกทันทีเมื่อกรอกข้อมูลเสร็จ
+        function triggerAutoSave() {
+            const name = document.getElementById('customer-name').value.trim();
+            const phone = document.getElementById('customer-phone').value.trim();
+            const address = document.getElementById('customer-address').value.trim();
+
+            if (!name && !phone) return;
+            
+            const currentData = `${name}_${cleanPhone(phone)}_${address}`;
+            if (currentData === lastSavedData) return; // ถ้าข้อมูลเดิมไม่เปลี่ยน ไม่ต้องยิงเซฟซ้ำ
+
+            saveCustomerOnline(name, phone, address);
+        }
+
+        function saveCustomerOnline(name, phone, address) {
+            if (!name && !phone) return;
+            if (!CUSTOMER_SCRIPT_URL) return;
+
+            lastSavedData = `${name}_${cleanPhone(phone)}_${address}`;
+            showSaveStatus('☁️ กำลังบันทึกข้อมูลลูกค้า...', '#888');
+
+            const url = `${CUSTOMER_SCRIPT_URL}?action=save&name=${encodeURIComponent(name)}&phone=${encodeURIComponent(phone)}&address=${encodeURIComponent(address)}`;
+            fetch(url).then(r => r.json()).then(res => {
+                const cPhone = cleanPhone(phone);
+                const idx = customerList.findIndex(c => (cPhone && cleanPhone(c.phone) === cPhone) || (name && c.name.toLowerCase() === name.toLowerCase()));
+                
+                if (idx >= 0) {
+                    customerList[idx] = { name, phone, address };
+                    showSaveStatus('🔄 อัปเดตข้อมูลลูกค้าเดิมเรียบร้อยแล้ว (ไม่เพิ่มซ้ำ)', '#27ae60');
+                } else {
+                    customerList.push({ name, phone, address });
+                    showSaveStatus('✅ บันทึกลูกค้าใหม่ลงชีทเรียบร้อยแล้ว', '#27ae60');
+                }
+                updateCustomerDatalist();
+            }).catch(err => {
+                console.warn('บันทึกลูกค้าไม่สำเร็จ:', err);
+                showSaveStatus('⚠️ บันทึกข้อมูลลูกค้าไม่สำเร็จ', '#e74c3c');
+            });
         }
 
         function addCustomItem() {
@@ -604,6 +664,7 @@
             document.getElementById('grand-total').innerText = (subtotal + deliveryFee) + ' ฿';
         }
 
+        // Auto Paste ดึงข้อมูลและเซฟขึ้นชีททันที
         function parseAutoOrder() {
             const text = document.getElementById('auto-paste-area').value;
             if (!text.trim()) { alert('กรุณาวางข้อความสั่งซื้อของลูกค้าก่อนครับ 😊'); return; }
@@ -658,32 +719,23 @@
             document.getElementById('customer-address').value = custAddress;
             document.getElementById('order-note').value = custNote;
 
-            if (!custAddress && (custPhone || custName)) {
-                const found = customerList.find(c => (custPhone && c.phone === custPhone) || (custName && c.name === custName));
+            // ถ้าไม่มีที่อยู่ในข้อความ แต่เบอร์ตรงกับประวัติในชีทลูกค้า ให้ดึงที่อยู่เดิมมาใส่ให้อัตโนมัติ
+            const cleanInputPhone = cleanPhone(custPhone);
+            if (!custAddress && (cleanInputPhone || custName)) {
+                const found = customerList.find(c => (cleanInputPhone && cleanPhone(c.phone) === cleanInputPhone) || (custName && c.name.toLowerCase() === custName.toLowerCase()));
                 if (found && found.address) {
                     document.getElementById('customer-address').value = found.address;
                 }
             }
 
+            // ⚡ สั่ง Auto-Save ทันที!
+            if (custName || custPhone) {
+                saveCustomerOnline(custName, custPhone, document.getElementById('customer-address').value.trim());
+            }
+
             renderCart();
             alert('✨ ดึงข้อมูลลูกค้า ที่อยู่ และรายการสั่งซื้อเรียบร้อยแล้ว!');
             document.getElementById('auto-paste-area').value = ''; 
-        }
-
-        function saveCustomerOnline(name, phone, address) {
-            if (!name && !phone) return;
-            if (!CUSTOMER_SCRIPT_URL) return;
-
-            const url = `${CUSTOMER_SCRIPT_URL}?action=save&name=${encodeURIComponent(name)}&phone=${encodeURIComponent(phone)}&address=${encodeURIComponent(address)}`;
-            fetch(url).then(r => r.json()).then(res => {
-                const idx = customerList.findIndex(c => (phone && c.phone === phone) || (name && c.name === name));
-                if (idx >= 0) {
-                    customerList[idx] = { name, phone, address };
-                } else {
-                    customerList.push({ name, phone, address });
-                }
-                updateCustomerDatalist();
-            }).catch(err => console.warn('บันทึกลูกค้าไม่สำเร็จ:', err));
         }
 
         function generateReceiptImage() {
@@ -694,6 +746,7 @@
             const custAddress = document.getElementById('customer-address').value.trim();
             const note = document.getElementById('order-note').value.trim();
 
+            // สั่งบันทึก/อัปเดตข้อมูลลูกค้าอีกรอบเพื่อความชัวร์
             saveCustomerOnline(custName, custPhone, custAddress);
 
             const receiptWindow = window.open('', '_blank');
@@ -758,7 +811,7 @@
                 const total = qty * item.price;
                 subtotal += total;
 
-                // 🔍 กรองไม่แสดง "ไม่รับน้ำจิ้ม" บนใบเสร็จ
+                // กรองไม่แสดง "ไม่รับน้ำจิ้ม" บนใบเสร็จ
                 let sauceLine = '';
                 if (cartSauces[id] && cartSauces[id].length > 0) {
                     const validSauces = cartSauces[id].filter(s => s && s !== 'ไม่รับน้ำจิ้ม' && !s.includes('ไม่รับ'));
@@ -778,7 +831,7 @@
 
             document.getElementById('r-subtotal').innerText = subtotal + ' ฿';
             document.getElementById('r-delfee').innerText = deliveryFee + ' ฿';
-            document.getElementById('r-grandtotal').innerText = (subtotal + deliveryFee) + ' ฿';
+            document.getElementById('grand-total').innerText = (subtotal + deliveryFee) + ' ฿';
 
             setTimeout(() => {
                 const receiptElement = document.getElementById('receipt');
