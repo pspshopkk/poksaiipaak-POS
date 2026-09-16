@@ -17,6 +17,7 @@
             --accent-blue: #0084FF;
             --purple-service: #8e44ad;
         }
+        * { box-sizing: border-box; }
         body {
             font-family: 'Sarabun', sans-serif;
             background-color: var(--bg);
@@ -54,14 +55,14 @@
         h2 { margin-top: 0; color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
         
         .auto-paste-box { background: #eef6ff; border: 1px solid #b3d7ff; padding: 12px; border-radius: 8px; margin-bottom: 12px; }
-        .auto-paste-box textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-family: 'Sarabun'; font-size: 13px; resize: vertical; box-sizing: border-box; }
+        .auto-paste-box textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-family: 'Sarabun'; font-size: 13px; resize: vertical; }
         .btn-auto-parse { background: var(--accent-blue); color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-family: 'Sarabun'; font-weight: bold; margin-top: 6px; width: 100%; font-size: 14px;}
         .btn-auto-parse:hover { background: #0066cc; }
 
         .custom-item-box { background: #fdf7f2; border: 1px dashed #f5cba7; padding: 10px 12px; border-radius: 8px; margin-bottom: 12px; }
-        .custom-item-row { display: flex; gap: 6px; margin-bottom: 6px; }
-        .custom-item-row input { padding: 6px 8px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; font-family: 'Sarabun'; }
-        .btn-add-custom { background: var(--primary); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 13px; font-weight: bold; font-family: 'Sarabun'; }
+        .custom-item-row { display: flex; gap: 6px; margin-bottom: 6px; width: 100%; }
+        .custom-item-row input { padding: 6px 8px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; font-family: 'Sarabun'; min-width: 0; }
+        .btn-add-custom { background: var(--primary); color: white; border: none; padding: 7px 12px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 13px; font-weight: bold; font-family: 'Sarabun'; }
         .btn-add-custom:hover { background: #ba4a00; }
 
         .category-title { background: #fdf2e9; padding: 8px 10px; border-radius: 5px; margin: 20px 0 10px 0; font-weight: 600; color: var(--primary); font-size: 18px; }
@@ -92,7 +93,7 @@
 
         .form-group { margin-bottom: 12px; }
         .form-group label { display: block; font-size: 13px; margin-bottom: 4px; font-weight: 600;}
-        .form-group input, .form-group textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 4px; font-family: 'Sarabun'; box-sizing: border-box; font-size: 14px;}
+        .form-group input, .form-group textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 4px; font-family: 'Sarabun'; font-size: 14px;}
         
         .delivery-btns { display: flex; gap: 5px; margin-bottom: 10px; }
         .delivery-btns button { flex: 1; padding: 6px 0; border: 1px solid var(--primary); background: white; color: var(--primary); border-radius: 4px; cursor: pointer; font-family: 'Sarabun'; font-weight: 500; font-size: 13px;}
@@ -125,7 +126,6 @@
             font-size: 12px;
             color: black;
             background: white;
-            box-sizing: border-box;
         }
         
         .r-header { text-align: center; border-bottom: 1px dashed black; padding-bottom: 5px; margin-bottom: 5px; }
@@ -166,13 +166,13 @@
                 <button type="button" class="btn-auto-parse" onclick="parseAutoOrder()">✨ โหลดข้อมูลออเดอร์อัตโนมัติ</button>
             </div>
 
-            <!-- กล่องเพิ่มรายการพิเศษนอกเมนู -->
+            <!-- กล่องเพิ่มรายการพิเศษนอกเมนู (แก้ปัญหาช่องล้นเรียบร้อย) -->
             <div class="custom-item-box">
                 <label style="display:block; font-size:13px; font-weight:bold; color:var(--primary); margin-bottom:5px;">➕ เพิ่มรายการพิเศษ (นอกเหนือเมนู):</label>
                 <div class="custom-item-row">
-                    <input type="text" id="custom-name" placeholder="ชื่อรายการ เช่น เมล่อนครึ่งลูก" style="flex: 2;">
+                    <input type="text" id="custom-name" placeholder="ชื่อรายการ เช่น เมล่อน" style="flex: 2;">
                     <input type="number" id="custom-price" placeholder="ราคา" min="0" style="flex: 1;">
-                    <input type="number" id="custom-qty" value="1" min="1" style="width: 50px; text-align: center;">
+                    <input type="number" id="custom-qty" value="1" min="1" style="width: 48px; flex-shrink: 0; text-align: center;">
                 </div>
                 <button type="button" class="btn-add-custom" onclick="addCustomItem()">+ เพิ่มรายการพิเศษลงบิล</button>
             </div>
@@ -758,7 +758,7 @@
                 const total = qty * item.price;
                 subtotal += total;
 
-                // 🔍 กรองไม่ให้แสดงรายการ "ไม่รับน้ำจิ้ม" บนใบเสร็จ
+                // 🔍 กรองไม่แสดง "ไม่รับน้ำจิ้ม" บนใบเสร็จ
                 let sauceLine = '';
                 if (cartSauces[id] && cartSauces[id].length > 0) {
                     const validSauces = cartSauces[id].filter(s => s && s !== 'ไม่รับน้ำจิ้ม' && !s.includes('ไม่รับ'));
