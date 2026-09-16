@@ -302,8 +302,8 @@
         // 🍉 1. ลิงก์ชีทเมนูผลไม้
         const MENU_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyaPiqWEQhgM7nxSTDj67DU_8TsWVu36aJNLagaQ33OBRKGErUyiA2x3M9YiMF7kuvL/exec'; 
 
-        // 👥 2. ลิงก์ชีทฐานข้อมูลลูกค้า
-        const CUSTOMER_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzD6SlGLrhtwurz1MUbhwi9WVNFAVsMRfZdjQ8jFQVcG4meZyH5ztPzQnSX_u8sq2I6cA/exec'; 
+        // 👥 2. ลิงก์ชีทฐานข้อมูลลูกค้า (อัปเดตใหม่ล่าสุดเรียบร้อยครับ)
+        const CUSTOMER_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw_E7mdky1b9Jle_1YK6-a4SOgbm7nAHYJOtTgS3aNrizeFiOxwywT92BqI8NA7RrEeOA/exec'; 
 
         let menuData = [];
         let customerList = [];
@@ -418,7 +418,7 @@
             if (!name && !phone) return;
             
             const currentData = `${name}_${cleanPhone(phone)}_${address}`;
-            if (currentData === lastSavedData) return; // ถ้าข้อมูลเดิมไม่เปลี่ยน ไม่ต้องยิงเซฟซ้ำ
+            if (currentData === lastSavedData) return;
 
             saveCustomerOnline(name, phone, address);
         }
@@ -719,7 +719,6 @@
             document.getElementById('customer-address').value = custAddress;
             document.getElementById('order-note').value = custNote;
 
-            // ถ้าไม่มีที่อยู่ในข้อความ แต่เบอร์ตรงกับประวัติในชีทลูกค้า ให้ดึงที่อยู่เดิมมาใส่ให้อัตโนมัติ
             const cleanInputPhone = cleanPhone(custPhone);
             if (!custAddress && (cleanInputPhone || custName)) {
                 const found = customerList.find(c => (cleanInputPhone && cleanPhone(c.phone) === cleanInputPhone) || (custName && c.name.toLowerCase() === custName.toLowerCase()));
@@ -728,7 +727,7 @@
                 }
             }
 
-            // ⚡ สั่ง Auto-Save ทันที!
+            // สั่ง Auto-Save ทันที
             if (custName || custPhone) {
                 saveCustomerOnline(custName, custPhone, document.getElementById('customer-address').value.trim());
             }
@@ -746,7 +745,6 @@
             const custAddress = document.getElementById('customer-address').value.trim();
             const note = document.getElementById('order-note').value.trim();
 
-            // สั่งบันทึก/อัปเดตข้อมูลลูกค้าอีกรอบเพื่อความชัวร์
             saveCustomerOnline(custName, custPhone, custAddress);
 
             const receiptWindow = window.open('', '_blank');
