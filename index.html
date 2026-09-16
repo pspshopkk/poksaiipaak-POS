@@ -327,7 +327,6 @@
             return itemName.includes('มะม่วง') || itemName.includes('สับปะรด') || itemName.includes('แอปเปิ้ล') || itemName.includes('ฝรั่ง');
         }
 
-        // โหลดเมนูและข้อมูลลูกค้าพร้อมกัน
         async function loadData() {
             try {
                 const response = await fetch(MENU_SCRIPT_URL + '?action=getData');
@@ -363,7 +362,6 @@
             }
         }
 
-        // Auto-fill ดึงที่อยู่ลูกค้าเก่าเมื่อพิมพ์ชื่อหรือเบอร์
         function onCustomerInput(type) {
             const phoneVal = document.getElementById('customer-phone').value.trim();
             const nameVal = document.getElementById('customer-name').value.trim();
@@ -391,7 +389,6 @@
             }
         }
 
-        // ฟังก์ชันเพิ่มรายการพิเศษนอกเหนือเมนู
         function addCustomItem() {
             const nameInput = document.getElementById('custom-name');
             const priceInput = document.getElementById('custom-price');
@@ -407,7 +404,7 @@
                 return;
             }
             if (isNaN(price) || price < 0) {
-                alert('กรุณากรอกราคาที่ถูกต้อง (เช่น 0 หรือระบุจำนวนเงิน)');
+                alert('กรุณากรอกราคาที่ถูกต้อง');
                 priceInput.focus();
                 return;
             }
@@ -607,7 +604,6 @@
             document.getElementById('grand-total').innerText = (subtotal + deliveryFee) + ' ฿';
         }
 
-        // Auto Paste ดึงครบทั้งชื่อ เบอร์ ที่อยู่ และหมายเหตุ
         function parseAutoOrder() {
             const text = document.getElementById('auto-paste-area').value;
             if (!text.trim()) { alert('กรุณาวางข้อความสั่งซื้อของลูกค้าก่อนครับ 😊'); return; }
@@ -674,7 +670,6 @@
             document.getElementById('auto-paste-area').value = ''; 
         }
 
-        // สั่งบันทึกข้อมูลลูกค้าขึ้น Google Sheets ลูกค้า
         function saveCustomerOnline(name, phone, address) {
             if (!name && !phone) return;
             if (!CUSTOMER_SCRIPT_URL) return;
@@ -763,9 +758,13 @@
                 const total = qty * item.price;
                 subtotal += total;
 
+                // 🔍 กรองไม่ให้แสดงรายการ "ไม่รับน้ำจิ้ม" บนใบเสร็จ
                 let sauceLine = '';
                 if (cartSauces[id] && cartSauces[id].length > 0) {
-                    sauceLine = `<br><small style="color:#555; font-style:italic;">(${cartSauces[id].join(', ')})</small>`;
+                    const validSauces = cartSauces[id].filter(s => s && s !== 'ไม่รับน้ำจิ้ม' && !s.includes('ไม่รับ'));
+                    if (validSauces.length > 0) {
+                        sauceLine = `<br><small style="color:#555; font-style:italic;">(${validSauces.join(', ')})</small>`;
+                    }
                 }
 
                 rItems.innerHTML += `
