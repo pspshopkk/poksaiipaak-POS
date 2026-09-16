@@ -3,147 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>POS - ปอกใส่ปาก (ระบบจัดการหลังบ้าน)</title>
+    <title>POS - ปอกใส่ปาก</title>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
             --primary: #d35400;
+            --primary-hover: #ba4a00;
             --bg: #f9f9f9;
             --white: #ffffff;
             --border: #e0e0e0;
             --success: #27ae60;
             --danger: #e74c3c;
-            --accent-blue: #0084FF;
-            --purple-service: #8e44ad;
+            --blue: #0084FF;
+            --purple: #8e44ad;
         }
-        * { box-sizing: border-box; }
-        body {
-            font-family: 'Sarabun', sans-serif;
-            background-color: var(--bg);
-            margin: 0;
-            padding: 20px;
-            color: #333;
-        }
-        .container {
-            display: flex;
-            gap: 20px;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-        
-        @media (max-width: 768px) {
-            .container { flex-direction: column; }
-        }
+        * { box-sizing: border-box; font-family: 'Sarabun', sans-serif; }
+        body { background: var(--bg); margin: 0; padding: 20px; color: #333; }
+        .container { display: flex; gap: 20px; max-width: 1400px; margin: 0 auto; }
+        @media (max-width: 768px) { .container { flex-direction: column; } }
 
-        .menu-section { flex: 1.8; background: var(--white); padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        
-        .cart-section { 
-            flex: 1.2; 
-            background: var(--white); 
-            padding: 20px; 
-            border-radius: 10px; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
-            display: flex; 
-            flex-direction: column; 
-            position: sticky; 
-            top: 20px; 
-            max-height: calc(100vh - 40px); 
-            overflow-y: auto; 
-        }
-        
-        h2 { margin-top: 0; color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
-        
+        /* การ์ดฝั่งเมนูและตะกร้า */
+        .menu-section, .cart-section { background: var(--white); padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .menu-section { flex: 1.8; }
+        .cart-section { flex: 1.2; display: flex; flex-direction: column; position: sticky; top: 20px; max-height: calc(100vh - 40px); overflow-y: auto; }
+        h2 { margin: 0 0 15px 0; color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 8px; }
+
+        /* ช่องวางข้อความ Auto-Paste */
         .auto-paste-box { background: #eef6ff; border: 1px solid #b3d7ff; padding: 12px; border-radius: 8px; margin-bottom: 12px; }
-        .auto-paste-box textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-family: 'Sarabun'; font-size: 13px; resize: vertical; }
-        .btn-auto-parse { background: var(--accent-blue); color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-family: 'Sarabun'; font-weight: bold; margin-top: 6px; width: 100%; font-size: 14px;}
-        .btn-auto-parse:hover { background: #0066cc; }
+        .auto-paste-box textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; resize: vertical; }
+        .btn-auto-parse { background: var(--blue); color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 6px; font-size: 14px; }
 
+        /* รายการพิเศษนอกเมนู */
         .custom-item-box { background: #fdf7f2; border: 1px dashed #f5cba7; padding: 10px 12px; border-radius: 8px; margin-bottom: 12px; }
-        .custom-item-row { display: flex; gap: 6px; margin-bottom: 6px; width: 100%; }
-        .custom-item-row input { padding: 6px 8px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; font-family: 'Sarabun'; min-width: 0; }
-        .btn-add-custom { background: var(--primary); color: white; border: none; padding: 7px 12px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 13px; font-weight: bold; font-family: 'Sarabun'; }
-        .btn-add-custom:hover { background: #ba4a00; }
+        .custom-item-row { display: flex; gap: 6px; margin-bottom: 6px; }
+        .custom-item-row input { padding: 6px 8px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; min-width: 0; }
+        .btn-add-custom { background: var(--primary); color: white; border: none; padding: 7px; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; font-size: 13px; }
+        .btn-add-custom:hover { background: var(--primary-hover); }
 
-        .category-title { background: #fdf2e9; padding: 8px 10px; border-radius: 5px; margin: 20px 0 10px 0; font-weight: 600; color: var(--primary); font-size: 18px; }
-        .cat-dip { background: #fff0d4; color: #d35400; }
-        .cat-service { background: #f4ecf7; color: var(--purple-service); }
-        
-        .menu-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px dashed var(--border); transition: 0.2s; }
-        .menu-item:hover { background: #fdfdfd; }
+        /* ข้อมูลลูกค้า & Dropdown */
+        .customer-box { background: #fdfefe; border: 1px solid #d5dbdb; padding: 12px; border-radius: 8px; margin-bottom: 12px; }
+        .customer-box select { width: 100%; padding: 8px; border: 1px solid var(--blue); border-radius: 4px; font-size: 13px; font-weight: 500; background: #fff; margin-bottom: 10px; }
+        .form-group { margin-bottom: 10px; }
+        .form-group label { display: block; font-size: 13px; margin-bottom: 3px; font-weight: 600; }
+        .form-group label span.req { color: var(--danger); }
+        .form-group input, .form-group textarea { width: 100%; padding: 7px 10px; border: 1px solid var(--border); border-radius: 4px; font-size: 14px; }
+        .btn-save-cust { background: #2980b9; color: white; border: none; padding: 8px; border-radius: 4px; font-size: 13px; font-weight: bold; width: 100%; cursor: pointer; }
+        .btn-save-cust:hover { background: #1f618d; }
+        .btn-clear-cust { background: #ecf0f1; color: #555; border: 1px solid #ccc; padding: 3px 8px; border-radius: 4px; font-size: 12px; cursor: pointer; float: right; }
+        .status-badge { font-size: 12px; margin-top: 4px; min-height: 16px; font-weight: 500; }
+
+        /* รายการสินค้าในเมนู */
+        .category-title { padding: 8px 10px; border-radius: 5px; margin: 15px 0 10px; font-weight: 600; color: var(--primary); font-size: 17px; background: #fdf2e9; }
+        .cat-dip { background: #fff0d4; }
+        .cat-service { background: #f4ecf7; color: var(--purple); }
+        .menu-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px dashed var(--border); }
         .menu-item.out-of-stock { opacity: 0.6; background: #fafafa; }
         .menu-item.out-of-stock .item-name { text-decoration: line-through; color: #999; }
-        .badge-out { background: var(--danger); color: white; padding: 2px 6px; border-radius: 4px; font-size: 12px; margin-left: 5px; font-weight: bold;}
-        
-        .item-name { cursor: pointer; flex: 1; font-size: 15px; padding: 0 10px 0 0; line-height: 1.4;}
-        .item-price { font-weight: bold; width: 60px; text-align: right; margin-right: 15px; color: var(--primary);}
-        
-        .btn { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-family: 'Sarabun', sans-serif; font-size: 14px; font-weight: 500;}
-        .btn-add { background: var(--primary); color: white; width: 75px; }
-        .btn-add:hover { background: #ba4a00; }
-        .btn-disabled { background: #ccc; color: white; width: 75px; cursor: not-allowed; }
+        .item-name { cursor: pointer; flex: 1; font-size: 15px; padding-right: 10px; }
+        .btn-add { background: var(--primary); color: white; width: 70px; border: none; border-radius: 4px; padding: 6px; cursor: pointer; }
+        .btn-disabled { background: #ccc; color: white; width: 70px; border: none; border-radius: 4px; padding: 6px; cursor: not-allowed; }
 
-        .cart-list { flex: 1; overflow-y: auto; margin-bottom: 15px; min-height: 100px; border: 1px solid var(--border); padding: 10px; border-radius: 5px; background: #fafafa;}
-        .cart-item { display: flex; flex-direction: column; margin-bottom: 12px; font-size: 14px; border-bottom: 1px solid #eee; padding-bottom: 10px;}
+        /* ตะกร้าสินค้า */
+        .cart-list { flex: 1; overflow-y: auto; margin-bottom: 15px; min-height: 90px; border: 1px solid var(--border); padding: 10px; border-radius: 5px; background: #fafafa; }
+        .cart-item { display: flex; flex-direction: column; margin-bottom: 10px; font-size: 14px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
         .cart-item-main { display: flex; justify-content: space-between; align-items: center; width: 100%; }
-        .cart-controls button { width: 28px; height: 28px; cursor: pointer; border: 1px solid #ccc; background: #fff; border-radius: 3px; font-weight: bold;}
-        
+        .cart-controls button { width: 28px; height: 28px; cursor: pointer; border: 1px solid #ccc; background: #fff; border-radius: 3px; font-weight: bold; }
         .cart-sauce-row { background: #fff; padding: 6px; border-radius: 4px; border: 1px dashed #ccc; margin-top: 6px; font-size: 12px; display: flex; flex-direction: column; gap: 4px; }
-        .cart-sauce-select { padding: 3px; border-radius: 4px; border: 1px solid #ccc; font-family: 'Sarabun'; font-size: 12px; width: 100%; margin-top: 2px;}
+        .cart-sauce-select { padding: 3px; border-radius: 4px; border: 1px solid #ccc; font-size: 12px; width: 100%; }
 
-        .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; font-size: 13px; margin-bottom: 4px; font-weight: 600;}
-        .form-group input, .form-group textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 4px; font-family: 'Sarabun'; font-size: 14px;}
-        
-        .customer-status-badge { font-size: 12px; margin-top: 4px; min-height: 18px; font-weight: 500; transition: opacity 0.3s; }
+        /* ปุ่มเลือกช่องทาง & ค่าส่ง */
+        .btn-group { display: flex; gap: 5px; margin-bottom: 10px; }
+        .btn-group button { flex: 1; padding: 6px 0; border: 1px solid var(--primary); background: white; color: var(--primary); border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 500; }
+        .btn-group button.active { background: var(--primary); color: white; }
 
-        .delivery-btns { display: flex; gap: 5px; margin-bottom: 10px; }
-        .delivery-btns button { flex: 1; padding: 6px 0; border: 1px solid var(--primary); background: white; color: var(--primary); border-radius: 4px; cursor: pointer; font-family: 'Sarabun'; font-weight: 500; font-size: 13px;}
-        .delivery-btns button.active { background: var(--primary); color: white; }
-        
-        .totals { border-top: 2px dashed #ccc; padding-top: 12px; margin-bottom: 12px; }
-        .total-row { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 15px;}
-        .total-row.grand { font-size: 20px; font-weight: bold; color: var(--primary); margin-top: 8px;}
-        
-        .btn-print { width: 100%; padding: 12px; background: var(--success); color: white; font-size: 16px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-family: 'Sarabun'; box-shadow: 0 4px 6px rgba(39, 174, 96, 0.3); margin-top: auto;}
-        .btn-print:hover { background: #219a52; }
+        /* สรุปยอดเงิน & ปุ่มออกใบเสร็จ */
+        .totals { border-top: 2px dashed #ccc; padding-top: 10px; margin-bottom: 12px; }
+        .total-row { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 15px; }
+        .total-row.grand { font-size: 20px; font-weight: bold; color: var(--primary); }
+        .btn-print { width: 100%; padding: 12px; background: var(--success); color: white; font-size: 16px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 6px rgba(39, 174, 96, 0.3); }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 9999; padding: 15px; }
-        .modal-content { background: white; padding: 20px; border-radius: 12px; width: 100%; max-width: 380px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); text-align: center; }
+        /* Modal ใบเสร็จ */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 9999; padding: 15px; }
+        .modal-content { background: white; padding: 20px; border-radius: 12px; width: 100%; max-width: 380px; text-align: center; }
 
-        #receipt-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            opacity: 0;
-            pointer-events: none;
-            z-index: -1000;
-        }
-
-        #receipt { 
-            width: 212px; 
-            margin: 0; 
-            padding: 10px; 
-            font-family: 'Sarabun', sans-serif;
-            font-size: 12px;
-            color: black;
-            background: white;
-        }
-        
+        /* ใบเสร็จซ่อน */
+        #receipt-container { position: absolute; top: 0; left: 0; opacity: 0; pointer-events: none; z-index: -1000; }
+        #receipt { width: 212px; padding: 10px; font-size: 12px; background: white; color: black; }
         .r-header { text-align: center; border-bottom: 1px dashed black; padding-bottom: 5px; margin-bottom: 5px; }
         .r-title { font-size: 15px; font-weight: bold; margin: 0; }
         .r-info { margin: 2px 0; font-size: 11px; }
-        .r-address-print { font-size: 11px; margin: 3px 0; word-break: break-word; text-align: left; background: #fafafa; padding: 3px; border-radius: 3px;}
-        .r-note-print { margin: 5px 0; font-size: 12px; font-weight: bold; color: #d35400; border: 1px dashed #ccc; padding: 3px; display: none; }
-        
-        .r-table { width: 100%; border-collapse: collapse; margin-bottom: 5px; font-size: 11px;}
-        .r-table th { border-bottom: 1px dashed black; text-align: left; padding: 4px 0; font-size: 11px;}
-        .r-table td { padding: 4px 0; vertical-align: top; line-height: 1.3;}
-        .r-table .right { text-align: right; }
-        .r-table .center { text-align: center; }
-        .r-totals { border-top: 1px dashed black; padding-top: 5px; font-size: 12px;}
-        .r-totals .flex { display: flex; justify-content: space-between; margin-bottom: 3px;}
-        .r-totals .bold { font-weight: bold; font-size: 14px;}
+        .r-address-print { font-size: 11px; margin: 3px 0; text-align: left; background: #fafafa; padding: 3px; border-radius: 3px; word-break: break-word; }
+        .r-note-print { margin: 5px 0; font-size: 12px; font-weight: bold; color: var(--primary); border: 1px dashed #ccc; padding: 3px; display: none; }
+        .r-table { width: 100%; border-collapse: collapse; margin-bottom: 5px; font-size: 11px; }
+        .r-table th { border-bottom: 1px dashed black; text-align: left; padding: 4px 0; }
+        .r-table td { padding: 4px 0; vertical-align: top; line-height: 1.3; }
+        .r-totals { border-top: 1px dashed black; padding-top: 5px; font-size: 12px; }
+        .r-totals .flex { display: flex; justify-content: space-between; margin-bottom: 3px; }
         .r-footer { text-align: center; margin-top: 10px; font-size: 12px; font-weight: bold; }
     </style>
 </head>
@@ -153,9 +109,7 @@
         <!-- ฝั่งเมนูผลไม้ -->
         <div class="menu-section">
             <h2>📦 ระบบจัดการออเดอร์หน้าร้าน (POS)</h2>
-            <div id="menu-container">
-                <div style="text-align:center; padding:40px; color:#666;">กำลังโหลดฐานข้อมูลจากระบบคลาวด์... ⏳</div>
-            </div>
+            <div id="menu-container" style="text-align:center; padding:40px; color:#666;">กำลังโหลดฐานข้อมูลจากคลาวด์... ⏳</div>
         </div>
 
         <!-- ฝั่งตะกร้าและข้อมูลลูกค้า -->
@@ -163,59 +117,71 @@
             <h2>🛒 รายการสั่งซื้อ</h2>
             
             <div class="auto-paste-box">
-                <label style="display:block; font-size:13px; font-weight:bold; color:var(--accent-blue); margin-bottom:5px;">📋 วางข้อความคำสั่งซื้อจากลูกค้า (Auto Paste):</label>
+                <label style="display:block; font-size:13px; font-weight:bold; color:var(--blue); margin-bottom:5px;">📋 วางข้อความคำสั่งซื้อจากลูกค้า (Auto Paste):</label>
                 <textarea id="auto-paste-area" rows="2" placeholder="วางข้อความที่ลูกค้าคัดลอกส่งมาที่นี่..."></textarea>
                 <button type="button" class="btn-auto-parse" onclick="parseAutoOrder()">✨ โหลดข้อมูลออเดอร์อัตโนมัติ</button>
             </div>
 
-            <!-- กล่องเพิ่มรายการพิเศษนอกเมนู -->
+            <!-- กล่องเพิ่มรายการพิเศษ -->
             <div class="custom-item-box">
                 <label style="display:block; font-size:13px; font-weight:bold; color:var(--primary); margin-bottom:5px;">➕ เพิ่มรายการพิเศษ (นอกเหนือเมนู):</label>
                 <div class="custom-item-row">
                     <input type="text" id="custom-name" placeholder="ชื่อรายการ เช่น เมล่อน" style="flex: 2;">
                     <input type="number" id="custom-price" placeholder="ราคา" min="0" style="flex: 1;">
-                    <input type="number" id="custom-qty" value="1" min="1" style="width: 48px; flex-shrink: 0; text-align: center;">
+                    <input type="number" id="custom-qty" value="1" min="1" style="width: 48px; text-align: center;">
                 </div>
                 <button type="button" class="btn-add-custom" onclick="addCustomItem()">+ เพิ่มรายการพิเศษลงบิล</button>
             </div>
 
             <div class="form-group">
                 <label>ช่องทางการสั่งซื้อ:</label>
-                <div class="delivery-btns">
+                <div class="btn-group">
                     <button type="button" class="active" onclick="setChannel('LINE', this)">🟢 LINE</button>
                     <button type="button" onclick="setChannel('Facebook', this)">🔵 FB Inbox</button>
                     <button type="button" onclick="setChannel('หน้าร้าน', this)">🏠 หน้าร้าน</button>
                 </div>
             </div>
+
+            <!-- กล่องข้อมูลลูกค้า -->
+            <div class="customer-box">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                    <label style="font-weight:bold; font-size:13px; color:#2c3e50;">👥 ข้อมูลลูกค้า & สถานที่จัดส่ง:</label>
+                    <button type="button" class="btn-clear-cust" onclick="clearCustomerFields()">➕ ล้างช่องกรอกใหม่</button>
+                </div>
+
+                <select id="customer-dropdown" onchange="onSelectCustomerDropdown(this)">
+                    <option value="">-- กำลังโหลดรายชื่อลูกค้า... --</option>
+                </select>
+                
+                <div class="form-group">
+                    <label>👤 ชื่อลูกค้า: <span class="req">*</span></label>
+                    <input type="text" id="customer-name" placeholder="ระบุชื่อจริง หรือชื่อเล่น">
+                </div>
+
+                <div class="form-group">
+                    <label>📞 เบอร์โทรศัพท์: <span class="req">*</span></label>
+                    <input type="tel" id="customer-phone" placeholder="เช่น 081-xxx-xxxx">
+                </div>
+
+                <div class="form-group">
+                    <label>📍 สถานที่จัดส่ง: <span class="req">*</span></label>
+                    <textarea id="customer-address" rows="2" placeholder="บ้านเลขที่, ซอย หรือวางลิงก์ Google Maps..."></textarea>
+                </div>
+
+                <button type="button" class="btn-save-cust" onclick="manualSaveCustomer()">💾 บันทึก / อัปเดตข้อมูลลูกค้าลงชีท</button>
+                <div id="customer-save-status" class="status-badge"></div>
+            </div>
             
             <div class="form-group">
-                <label>📞 เบอร์โทรศัพท์ลูกค้า (พิมพ์เพื่อค้นหาลูกค้าเดิม):</label>
-                <input type="tel" id="customer-phone" list="customer-phone-list" placeholder="เช่น 081-xxx-xxxx" oninput="onCustomerInput('phone')" onblur="triggerAutoSave()">
-                <datalist id="customer-phone-list"></datalist>
-            </div>
-
-            <div class="form-group">
-                <label>👤 ชื่อลูกค้า:</label>
-                <input type="text" id="customer-name" list="customer-name-list" placeholder="ชื่อเล่น หรือชื่อจริง" oninput="onCustomerInput('name')" onblur="triggerAutoSave()">
-                <datalist id="customer-name-list"></datalist>
-            </div>
-
-            <div class="form-group">
-                <label>📍 สถานที่จัดส่ง (พิกัด / ที่อยู่ / ลิงก์ Maps):</label>
-                <textarea id="customer-address" rows="2" placeholder="บ้านเลขที่, ซอย, จุดสังเกต หรือวางลิงก์ Google Maps..." onblur="triggerAutoSave()"></textarea>
-                <div id="customer-save-status" class="customer-status-badge"></div>
-            </div>
-            
-            <div class="form-group">
-                <label>📌 หมายเหตุพิเศษ (พิมพ์ระบุเอง):</label>
-                <input type="text" id="order-note" placeholder="เช่น จัดเซ็ตของขวัญ, ไม่รับช้อนส้อม, แยกพริกเกลือ">
+                <label>📌 หมายเหตุพิเศษ:</label>
+                <input type="text" id="order-note" placeholder="เช่น จัดเซ็ตของขวัญ, ไม่รับช้อนส้อม">
             </div>
 
             <div class="cart-list" id="cart-list"></div>
 
             <div class="form-group">
                 <label>ค่าบริการจัดส่ง (บาท):</label>
-                <div class="delivery-btns">
+                <div class="btn-group">
                     <button type="button" class="del-btn active" onclick="setDelivery(0)">ฟรี / รับเอง</button>
                     <button type="button" class="del-btn" onclick="setDelivery(10)">+ 10฿</button>
                     <button type="button" class="del-btn" onclick="setDelivery(20)">+ 20฿</button>
@@ -224,40 +190,29 @@
             </div>
 
             <div class="totals">
-                <div class="total-row">
-                    <span>รวมค่าสินค้า:</span>
-                    <span id="subtotal">0 ฿</span>
-                </div>
-                <div class="total-row">
-                    <span>ค่าจัดส่ง:</span>
-                    <span id="del-fee">0 ฿</span>
-                </div>
-                <div class="total-row grand">
-                    <span>รวมทั้งหมด:</span>
-                    <span id="grand-total">0 ฿</span>
-                </div>
+                <div class="total-row"><span>รวมค่าสินค้า:</span><span id="subtotal">0 ฿</span></div>
+                <div class="total-row"><span>ค่าจัดส่ง:</span><span id="del-fee">0 ฿</span></div>
+                <div class="total-row grand"><span>รวมทั้งหมด:</span><span id="grand-total">0 ฿</span></div>
             </div>
 
             <button class="btn-print" id="btn-download" onclick="generateReceiptImage()">🧾 ออกใบเสร็จ</button>
         </div>
     </div>
 
-    <!-- Modal สำรองในหน้าเดิม -->
+    <!-- Modal แสดงรูปใบเสร็จ -->
     <div class="modal-overlay" id="receipt-modal">
         <div class="modal-content">
-            <h3 style="margin-top:0; color:var(--primary); font-size:18px;">📄 สรุปใบเสร็จรับเงิน</h3>
-            <p style="font-size:13px; color:#555; margin-bottom:10px;"><b>แตะค้างที่รูปภาพ</b> หรือกดปุ่ม <b>บันทึกใบเสร็จ</b> ด้านล่างได้เลยค่ะ</p>
-            
-            <div style="max-height: 60vh; overflow-y: auto; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; padding: 5px; background: #f0f0f0;">
-                <img id="receipt-result-img" src="" style="width: 100%; max-width: 230px; display: block; margin: 0 auto; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+            <h3 style="margin:0 0 10px; color:var(--primary); font-size:18px;">📄 สรุปใบเสร็จรับเงิน</h3>
+            <p style="font-size:13px; color:#555; margin-bottom:10px;"><b>แตะค้างที่รูป</b> หรือกดปุ่ม <b>บันทึกใบเสร็จ</b> ได้เลยค่ะ</p>
+            <div style="max-height:60vh; overflow-y:auto; margin-bottom:15px; background:#f0f0f0; border-radius:6px; padding:5px;">
+                <img id="receipt-result-img" src="" style="width:100%; max-width:230px; display:block; margin:0 auto; box-shadow:0 2px 8px rgba(0,0,0,0.15);">
             </div>
-            
             <div id="dl-btn-container"></div>
-            <button style="background:#666; color:white; border:none; padding:10px 20px; border-radius:6px; font-weight:bold; width:100%; cursor:pointer; font-family:'Sarabun';" onclick="closeReceiptModal()">✖ ปิดหน้าต่าง</button>
+            <button style="background:#666; color:white; border:none; padding:10px; border-radius:6px; font-weight:bold; width:100%; cursor:pointer;" onclick="closeReceiptModal()">✖ ปิดหน้าต่าง</button>
         </div>
     </div>
 
-    <!-- ต้นฉบับใบเสร็จซ่อนหลังบ้าน -->
+    <!-- ต้นฉบับใบเสร็จสำหรับวาดภาพ -->
     <div id="receipt-container">
         <div id="receipt">
             <div class="r-header">
@@ -270,220 +225,142 @@
             </div>
             <table class="r-table">
                 <thead>
-                    <tr>
-                        <th>รายการ</th>
-                        <th class="center" style="width: 30px;">จำนวน</th>
-                        <th class="right" style="width: 40px;">ราคา</th>
-                    </tr>
+                    <tr><th>รายการ</th><th style="text-align:center; width:30px;">จำนวน</th><th style="text-align:right; width:40px;">ราคา</th></tr>
                 </thead>
                 <tbody id="r-items"></tbody>
             </table>
             <div class="r-totals">
-                <div class="flex">
-                    <span>ค่าสินค้า:</span>
-                    <span id="r-subtotal"></span>
-                </div>
-                <div class="flex">
-                    <span>ค่าจัดส่ง:</span>
-                    <span id="r-delfee"></span>
-                </div>
-                <div class="flex bold">
-                    <span>รวมทั้งหมด:</span>
-                    <span id="r-grandtotal"></span>
-                </div>
+                <div class="flex"><span>ค่าสินค้า:</span><span id="r-subtotal"></span></div>
+                <div class="flex"><span>ค่าจัดส่ง:</span><span id="r-delfee"></span></div>
+                <div class="flex" style="font-weight:bold; font-size:14px;"><span>รวมทั้งหมด:</span><span id="r-grandtotal"></span></div>
             </div>
-            <div class="r-footer">
-                ขอบคุณที่อุดหนุนค่ะ 🙏
-            </div>
+            <div class="r-footer">ขอบคุณที่อุดหนุนค่ะ 🙏</div>
         </div>
     </div>
 
     <script>
-        // 🍉 1. ลิงก์ชีทเมนูผลไม้
         const MENU_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyaPiqWEQhgM7nxSTDj67DU_8TsWVu36aJNLagaQ33OBRKGErUyiA2x3M9YiMF7kuvL/exec'; 
-
-        // 👥 2. ลิงก์ชีทฐานข้อมูลลูกค้า (อัปเดตใหม่ล่าสุดเรียบร้อยครับ)
         const CUSTOMER_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw_E7mdky1b9Jle_1YK6-a4SOgbm7nAHYJOtTgS3aNrizeFiOxwywT92BqI8NA7RrEeOA/exec'; 
 
-        let menuData = [];
-        let customerList = [];
-        let itemDictionary = {};
-        let cart = {};
-        let cartSauces = {}; 
-        let deliveryFee = 0;
-        let orderChannel = 'LINE'; 
-        let lastSavedData = '';
+        let menuData = [], customerList = [], itemDictionary = {};
+        let cart = {}, cartSauces = {}, deliveryFee = 0, orderChannel = 'LINE';
+
+        const cleanPhone = p => String(p || '').replace(/[^0-9]/g, '');
+        const isServiceItem = item => /บริการ|service|addon/i.test(String(item.category || ''));
+        const checkFruitSauceEligibility = name => !name.includes('ฝรั่งแช่บ๊วย') && /มะม่วง|สับปะรด|แอปเปิ้ล|ฝรั่ง/.test(name);
 
         function setChannel(channel, btn) {
             orderChannel = channel;
-            const parent = btn.parentElement;
-            parent.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+            btn.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-        }
-
-        function isServiceItem(item) {
-            const catStr = String(item.category || '').toLowerCase();
-            return catStr.includes('บริการ') || catStr === 'service' || catStr === 'addon';
-        }
-
-        function checkFruitSauceEligibility(itemName) {
-            if (itemName.includes('ฝรั่งแช่บ๊วย')) return false;
-            return itemName.includes('มะม่วง') || itemName.includes('สับปะรด') || itemName.includes('แอปเปิ้ล') || itemName.includes('ฝรั่ง');
-        }
-
-        function cleanPhone(p) {
-            return String(p || '').replace(/[^0-9]/g, '');
         }
 
         async function loadData() {
             try {
-                const response = await fetch(MENU_SCRIPT_URL + '?action=getData');
-                menuData = await response.json();
+                const res = await fetch(MENU_SCRIPT_URL + '?action=getData');
+                menuData = await res.json();
                 menuData.forEach(item => { itemDictionary[item.id] = item; });
                 renderMenu();
-            } catch (error) {
-                document.getElementById('menu-container').innerHTML = '<div style="text-align:center; padding:20px; color:red;">โหลดข้อมูลไม่สำเร็จ กรุณารีเฟรชหน้าเว็บ</div>';
+            } catch (e) {
+                document.getElementById('menu-container').innerHTML = '<div style="color:red; text-align:center;">โหลดเมนูไม่สำเร็จ กรุณารีเฟรช</div>';
             }
-
             loadCustomers();
         }
 
         async function loadCustomers() {
-            if (!CUSTOMER_SCRIPT_URL) return;
             try {
-                const response = await fetch(CUSTOMER_SCRIPT_URL);
-                customerList = await response.json();
-                updateCustomerDatalist();
+                const res = await fetch(CUSTOMER_SCRIPT_URL);
+                customerList = await res.json();
+                renderCustomerDropdown();
             } catch (e) {
-                console.warn('โหลดข้อมูลลูกค้าล่วงหน้าไม่สำเร็จ', e);
+                document.getElementById('customer-dropdown').innerHTML = '<option value="">-- ไม่สามารถโหลดรายชื่อลูกค้าได้ --</option>';
             }
         }
 
-        function updateCustomerDatalist() {
-            const phoneList = document.getElementById('customer-phone-list');
-            const nameList = document.getElementById('customer-name-list');
-            if (phoneList) {
-                phoneList.innerHTML = customerList.filter(c => c.phone).map(c => `<option value="${c.phone}">${c.name || ''}</option>`).join('');
-            }
-            if (nameList) {
-                nameList.innerHTML = customerList.filter(c => c.name).map(c => `<option value="${c.name}">${c.phone || ''}</option>`).join('');
+        function renderCustomerDropdown(selectedIdx = null) {
+            const dropdown = document.getElementById('customer-dropdown');
+            let html = '<option value="">-- 👤 เลือกลูกค้าเดิม (หรือกรอกใหม่ด้านล่าง) --</option>';
+            customerList.forEach((c, idx) => {
+                const isSel = (selectedIdx !== null && selectedIdx === idx) ? 'selected' : '';
+                html += `<option value="${idx}" ${isSel}>${c.name || 'ไม่ระบุชื่อ'} (${c.phone || '-'})</option>`;
+            });
+            dropdown.innerHTML = html;
+        }
+
+        function onSelectCustomerDropdown(el) {
+            if (el.value === "") return;
+            const c = customerList[el.value];
+            if (c) {
+                document.getElementById('customer-name').value = c.name || '';
+                document.getElementById('customer-phone').value = c.phone || '';
+                document.getElementById('customer-address').value = c.address || '';
+                showSaveStatus(`✅ ดึงข้อมูล: ${c.name} (${c.phone}) เรียบร้อยแล้ว`, '#2980b9');
             }
         }
 
-        // ค้นหาลูกค้าเดิมและเติมข้อมูลให้อัตโนมัติ
-        function onCustomerInput(type) {
-            const phoneVal = document.getElementById('customer-phone').value.trim();
-            const nameVal = document.getElementById('customer-name').value.trim();
-            const cleanInputPhone = cleanPhone(phoneVal);
-
-            if (type === 'phone' && cleanInputPhone.length >= 8) {
-                const found = customerList.find(c => cleanPhone(c.phone) === cleanInputPhone);
-                if (found) {
-                    if (found.name && !document.getElementById('customer-name').value) {
-                        document.getElementById('customer-name').value = found.name;
-                    }
-                    if (found.address && !document.getElementById('customer-address').value) {
-                        document.getElementById('customer-address').value = found.address;
-                    }
-                    showSaveStatus('ℹ️ ลูกค้าเก่าในระบบ (พร้อมอัปเดตถ้ามีข้อมูลใหม่)', '#2980b9');
-                }
-            } else if (type === 'name' && nameVal.length >= 2) {
-                const found = customerList.find(c => c.name.toLowerCase() === nameVal.toLowerCase());
-                if (found) {
-                    if (found.phone && !document.getElementById('customer-phone').value) {
-                        document.getElementById('customer-phone').value = found.phone;
-                    }
-                    if (found.address && !document.getElementById('customer-address').value) {
-                        document.getElementById('customer-address').value = found.address;
-                    }
-                    showSaveStatus('ℹ️ ลูกค้าเก่าในระบบ (พร้อมอัปเดตถ้ามีข้อมูลใหม่)', '#2980b9');
-                }
-            }
+        function clearCustomerFields() {
+            document.getElementById('customer-dropdown').value = "";
+            document.getElementById('customer-name').value = "";
+            document.getElementById('customer-phone').value = "";
+            document.getElementById('customer-address').value = "";
+            showSaveStatus('พร้อมกรอกลูกค้าใหม่แล้วค่ะ', '#666');
+            document.getElementById('customer-name').focus();
         }
 
-        function showSaveStatus(text, color) {
+        function showSaveStatus(text, color = '#27ae60') {
             const badge = document.getElementById('customer-save-status');
-            if (badge) {
-                badge.innerText = text;
-                badge.style.color = color || '#27ae60';
-            }
+            badge.innerText = text;
+            badge.style.color = color;
         }
 
-        // ระบบ Auto-Save บันทึกทันทีเมื่อกรอกข้อมูลเสร็จ
-        function triggerAutoSave() {
+        function manualSaveCustomer() {
             const name = document.getElementById('customer-name').value.trim();
             const phone = document.getElementById('customer-phone').value.trim();
             const address = document.getElementById('customer-address').value.trim();
 
-            if (!name && !phone) return;
-            
-            const currentData = `${name}_${cleanPhone(phone)}_${address}`;
-            if (currentData === lastSavedData) return;
+            if (!name) { alert('⚠️ กรุณากรอก "ชื่อลูกค้า" ก่อนนะคะ'); document.getElementById('customer-name').focus(); return; }
+            if (!phone) { alert('⚠️ กรุณากรอก "เบอร์โทรศัพท์" ก่อนนะคะ'); document.getElementById('customer-phone').focus(); return; }
+            if (!address) { alert('⚠️ กรุณากรอก "สถานที่จัดส่ง" ก่อนนะคะ'); document.getElementById('customer-address').focus(); return; }
 
-            saveCustomerOnline(name, phone, address);
-        }
-
-        function saveCustomerOnline(name, phone, address) {
-            if (!name && !phone) return;
-            if (!CUSTOMER_SCRIPT_URL) return;
-
-            lastSavedData = `${name}_${cleanPhone(phone)}_${address}`;
-            showSaveStatus('☁️ กำลังบันทึกข้อมูลลูกค้า...', '#888');
+            showSaveStatus('☁️ กำลังบันทึกข้อมูลลง Google Sheets...', '#888');
 
             const url = `${CUSTOMER_SCRIPT_URL}?action=save&name=${encodeURIComponent(name)}&phone=${encodeURIComponent(phone)}&address=${encodeURIComponent(address)}`;
-            fetch(url).then(r => r.json()).then(res => {
+            fetch(url).then(r => r.json()).then(() => {
                 const cPhone = cleanPhone(phone);
                 const idx = customerList.findIndex(c => (cPhone && cleanPhone(c.phone) === cPhone) || (name && c.name.toLowerCase() === name.toLowerCase()));
-                
+
                 if (idx >= 0) {
                     customerList[idx] = { name, phone, address };
-                    showSaveStatus('🔄 อัปเดตข้อมูลลูกค้าเดิมเรียบร้อยแล้ว (ไม่เพิ่มซ้ำ)', '#27ae60');
+                    renderCustomerDropdown(idx);
+                    alert(`🔄 อัปเดตข้อมูลคุณ "${name}" เรียบร้อยแล้วค่ะ!`);
                 } else {
                     customerList.push({ name, phone, address });
-                    showSaveStatus('✅ บันทึกลูกค้าใหม่ลงชีทเรียบร้อยแล้ว', '#27ae60');
+                    renderCustomerDropdown(customerList.length - 1);
+                    alert(`✅ บันทึกลูกค้าใหม่คุณ "${name}" ลงชีทสำเร็จแล้วค่ะ!`);
                 }
-                updateCustomerDatalist();
-            }).catch(err => {
-                console.warn('บันทึกลูกค้าไม่สำเร็จ:', err);
-                showSaveStatus('⚠️ บันทึกข้อมูลลูกค้าไม่สำเร็จ', '#e74c3c');
+                showSaveStatus(`✅ บันทึกข้อมูลสำเร็จ`, '#27ae60');
+            }).catch(() => {
+                alert('❌ ไม่สามารถบันทึกได้ กรุณาลองใหม่อีกครั้ง');
+                showSaveStatus('⚠️ บันทึกไม่สำเร็จ', '#e74c3c');
             });
         }
 
         function addCustomItem() {
-            const nameInput = document.getElementById('custom-name');
-            const priceInput = document.getElementById('custom-price');
-            const qtyInput = document.getElementById('custom-qty');
+            const nameEl = document.getElementById('custom-name');
+            const priceEl = document.getElementById('custom-price');
+            const qtyEl = document.getElementById('custom-qty');
+            const name = nameEl.value.trim();
+            const price = parseFloat(priceEl.value);
+            const qty = parseInt(qtyEl.value) || 1;
 
-            const name = nameInput.value.trim();
-            const price = parseFloat(priceInput.value);
-            const qty = parseInt(qtyInput.value) || 1;
-
-            if (!name) {
-                alert('กรุณากรอกชื่อรายการพิเศษก่อนครับ');
-                nameInput.focus();
-                return;
-            }
-            if (isNaN(price) || price < 0) {
-                alert('กรุณากรอกราคาที่ถูกต้อง');
-                priceInput.focus();
-                return;
-            }
+            if (!name) { alert('กรุณากรอกชื่อรายการพิเศษก่อนครับ'); nameEl.focus(); return; }
+            if (isNaN(price) || price < 0) { alert('กรุณากรอกราคาที่ถูกต้อง'); priceEl.focus(); return; }
 
             const customId = 'custom_' + Date.now();
-            itemDictionary[customId] = {
-                id: customId,
-                name: name,
-                price: price,
-                available: true,
-                category: 'custom'
-            };
-
+            itemDictionary[customId] = { id: customId, name, price, available: true, category: 'custom' };
             cart[customId] = qty;
 
-            nameInput.value = '';
-            priceInput.value = '';
-            qtyInput.value = '1';
-
+            nameEl.value = ''; priceEl.value = ''; qtyEl.value = '1';
             renderCart();
         }
 
@@ -491,72 +368,47 @@
             const container = document.getElementById('menu-container');
             container.innerHTML = '';
 
-            const standardCats = [...new Set(menuData.map(item => Number(item.category)))]
-                .filter(cat => !isNaN(cat) && cat >= 40 && cat <= 100)
-                .sort((a, b) => a - b);
-
+            const standardCats = [...new Set(menuData.map(i => Number(i.category)))].filter(c => !isNaN(c) && c >= 40 && c <= 100).sort((a,b)=>a-b);
             standardCats.forEach(cat => {
-                const items = menuData.filter(item => Number(item.category) === cat && !isServiceItem(item));
-                if (items.length > 0) {
-                    createCategoryBlock(`🍓 ---- กล่องละ ${cat}฿ ---- 🍓`, items, 'fruit');
-                }
+                const items = menuData.filter(i => Number(i.category) === cat && !isServiceItem(i));
+                if (items.length) createCategoryBlock(`🍓 ---- กล่องละ ${cat}฿ ---- 🍓`, items, 'fruit');
             });
 
-            const premiumItems = menuData.filter(item => !isNaN(Number(item.category)) && Number(item.category) > 100 && !isServiceItem(item));
-            if (premiumItems.length > 0) {
-                createCategoryBlock(`✨ ---- ผลไม้พรีเมียม ---- ✨`, premiumItems, 'fruit');
-            }
+            const premium = menuData.filter(i => !isNaN(Number(i.category)) && Number(i.category) > 100 && !isServiceItem(i));
+            if (premium.length) createCategoryBlock(`✨ ---- ผลไม้พรีเมียม ---- ✨`, premium, 'fruit');
 
-            const serviceItems = menuData.filter(item => isServiceItem(item));
-            if (serviceItems.length > 0) {
-                createCategoryBlock(`🎀 ---- บริการเสริม / แพ็กเกจของขวัญ ---- 🎀`, serviceItems, 'service');
-            }
+            const services = menuData.filter(i => isServiceItem(i));
+            if (services.length) createCategoryBlock(`🎀 ---- บริการเสริม / ของขวัญ ---- 🎀`, services, 'service');
 
-            const dipItems = menuData.filter(item => !isNaN(Number(item.category)) && Number(item.category) < 40 && !isServiceItem(item));
-            if (dipItems.length > 0) {
-                createCategoryBlock(`🥣 ---- ตัวเลือกน้ำจิ้ม / พริกเกลือ ---- 🥣`, dipItems, 'dip');
-            }
+            const dips = menuData.filter(i => !isNaN(Number(i.category)) && Number(i.category) < 40 && !isServiceItem(i));
+            if (dips.length) createCategoryBlock(`🥣 ---- ตัวเลือกน้ำจิ้ม / พริกเกลือ ---- 🥣`, dips, 'dip');
         }
 
         function createCategoryBlock(title, items, type) {
             const container = document.getElementById('menu-container');
             const catTitle = document.createElement('div');
-            
-            if (type === 'dip') {
-                catTitle.className = 'category-title cat-dip';
-            } else if (type === 'service') {
-                catTitle.className = 'category-title cat-service';
-            } else {
-                catTitle.className = 'category-title';
-            }
-            
+            catTitle.className = `category-title ${type === 'dip' ? 'cat-dip' : type === 'service' ? 'cat-service' : ''}`;
             catTitle.innerText = title;
             container.appendChild(catTitle);
 
             items.forEach(item => {
-                const itemDiv = document.createElement('div');
-                itemDiv.className = `menu-item ${!item.available ? 'out-of-stock' : ''}`;
-                const priceLabel = `(${item.price > 0 ? item.price + '฿' : 'ฟรี'})`;
-                
-                itemDiv.innerHTML = `
+                const div = document.createElement('div');
+                div.className = `menu-item ${!item.available ? 'out-of-stock' : ''}`;
+                div.innerHTML = `
                     <div class="item-name" ${item.available ? `onclick="addToCart('${item.id}')"` : ''}>
-                        ${item.name} <span style="color:var(--primary); font-size:13px;">${priceLabel}</span>
-                        ${!item.available ? '<span class="badge-out">หมด</span>' : ''}
+                        ${item.name} <span style="color:var(--primary); font-size:13px;">(${item.price > 0 ? item.price + '฿' : 'ฟรี'})</span>
                     </div>
                     ${item.available 
-                        ? `<button class="btn btn-add" onclick="addToCart('${item.id}')">+ เพิ่ม</button>`
-                        : `<button class="btn btn-disabled" disabled>หมด</button>`
-                    }
+                        ? `<button class="btn-add" onclick="addToCart('${item.id}')">+ เพิ่ม</button>` 
+                        : `<button class="btn-disabled" disabled>หมด</button>`}
                 `;
-                container.appendChild(itemDiv);
+                container.appendChild(div);
             });
         }
 
         function addToCart(id) {
-            if(!itemDictionary[id] || !itemDictionary[id].available) return;
-            if(!cart[id]) cart[id] = 0;
-            cart[id]++;
-
+            if (!itemDictionary[id]?.available) return;
+            cart[id] = (cart[id] || 0) + 1;
             if (!isServiceItem(itemDictionary[id]) && checkFruitSauceEligibility(itemDictionary[id].name)) {
                 if (!cartSauces[id]) cartSauces[id] = [];
                 cartSauces[id].push("พริกเกลือนัวร์ (ฟรี)");
@@ -565,33 +417,20 @@
         }
 
         function updateQty(id, change) {
-            if(!cart[id]) return;
+            if (!cart[id]) return;
             cart[id] += change;
-
             if (!cartSauces[id]) cartSauces[id] = [];
-            if (change > 0) {
-                cartSauces[id].push("พริกเกลือนัวร์ (ฟรี)");
-            } else if (change < 0) {
-                cartSauces[id].pop();
-            }
+            if (change > 0) cartSauces[id].push("พริกเกลือนัวร์ (ฟรี)");
+            else cartSauces[id].pop();
 
-            if(cart[id] <= 0) { delete cart[id]; delete cartSauces[id]; }
+            if (cart[id] <= 0) { delete cart[id]; delete cartSauces[id]; }
             renderCart();
-        }
-
-        function changeCartSauce(itemId, index, selectEl) {
-            if (!cartSauces[itemId]) cartSauces[itemId] = [];
-            cartSauces[itemId][index] = selectEl.value;
         }
 
         function setDelivery(fee) {
             deliveryFee = fee;
-            const container = document.querySelectorAll('.delivery-btns')[1]; 
-            container.querySelectorAll('.del-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if(btn.innerText.includes(fee) || (fee === 0 && btn.innerText.includes('ฟรี'))) {
-                    btn.classList.add('active');
-                }
+            document.querySelectorAll('.del-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.innerText.includes(fee) || (fee === 0 && btn.innerText.includes('ฟรี')));
             });
             renderCart();
         }
@@ -608,55 +447,51 @@
                 const totalItem = qty * item.price;
                 subtotal += totalItem;
 
-                let sauceSelectorHTML = '';
+                let sauceHTML = '';
                 if (!isServiceItem(item) && checkFruitSauceEligibility(item.name) && qty > 0) {
-                    sauceSelectorHTML = `<div class="cart-sauce-row">`;
-                    for(let i=0; i<qty; i++) {
-                        if(!cartSauces[id]) cartSauces[id] = [];
-                        if(!cartSauces[id][i]) cartSauces[id][i] = "พริกเกลือนัวร์ (ฟรี)";
-                        const curSauce = cartSauces[id][i];
-
-                        sauceSelectorHTML += `
-                            <div>
-                                กล่องที่ ${i+1}: 
-                                <select class="cart-sauce-select" onchange="changeCartSauce('${id}', ${i}, this)">
-                                    <option value="ไม่รับน้ำจิ้ม" ${curSauce === 'ไม่รับน้ำจิ้ม' ? 'selected' : ''}>❌ ไม่รับน้ำจิ้ม</option>
-                                    <option value="พริกเกลือนัวร์ (ฟรี)" ${curSauce === 'พริกเกลือนัวร์ (ฟรี)' ? 'selected' : ''}>พริกเกลือนัวร์ (ฟรี)</option>
-                                    <option value="พริกเกลือกะปิแห้ง (ฟรี)" ${curSauce === 'พริกเกลือกะปิแห้ง (ฟรี)' ? 'selected' : ''}>พริกเกลือกะปิแห้ง (ฟรี)</option>
-                                    <option value="พริกเกลือลาวแซ่บ (ฟรี)" ${curSauce === 'พริกเกลือลาวแซ่บ (ฟรี)' ? 'selected' : ''}>พริกเกลือลาวแซ่บ (ฟรี)</option>
-                                    <option value="น้ำจิ้มบ๊วยเค็ม (ฟรี)" ${curSauce === 'น้ำจิ้มบ๊วยเค็ม (ฟรี)' ? 'selected' : ''}>น้ำจิ้มบ๊วยเค็ม (ฟรี)</option>
-                                    <option value="กะปิปลาร้า (+20฿)" ${curSauce === 'กะปิปลาร้า (+20฿)' ? 'selected' : ''}>กะปิปลาร้า (+20฿)</option>
-                                    <option value="กะปิหวาน (+20฿)" ${curSauce === 'กะปิหวาน (+20฿)' ? 'selected' : ''}>กะปิหวาน (+20฿)</option>
+                    sauceHTML = `<div class="cart-sauce-row">`;
+                    for (let i = 0; i < qty; i++) {
+                        if (!cartSauces[id]) cartSauces[id] = [];
+                        if (!cartSauces[id][i]) cartSauces[id][i] = "พริกเกลือนัวร์ (ฟรี)";
+                        const cur = cartSauces[id][i];
+                        sauceHTML += `
+                            <div>กล่องที่ ${i+1}: 
+                                <select class="cart-sauce-select" onchange="cartSauces['${id}'][${i}] = this.value">
+                                    <option value="ไม่รับน้ำจิ้ม" ${cur === 'ไม่รับน้ำจิ้ม' ? 'selected' : ''}>❌ ไม่รับน้ำจิ้ม</option>
+                                    <option value="พริกเกลือนัวร์ (ฟรี)" ${cur === 'พริกเกลือนัวร์ (ฟรี)' ? 'selected' : ''}>พริกเกลือนัวร์ (ฟรี)</option>
+                                    <option value="พริกเกลือกะปิแห้ง (ฟรี)" ${cur === 'พริกเกลือกะปิแห้ง (ฟรี)' ? 'selected' : ''}>พริกเกลือกะปิแห้ง (ฟรี)</option>
+                                    <option value="พริกเกลือลาวแซ่บ (ฟรี)" ${cur === 'พริกเกลือลาวแซ่บ (ฟรี)' ? 'selected' : ''}>พริกเกลือลาวแซ่บ (ฟรี)</option>
+                                    <option value="น้ำจิ้มบ๊วยเค็ม (ฟรี)" ${cur === 'น้ำจิ้มบ๊วยเค็ม (ฟรี)' ? 'selected' : ''}>น้ำจิ้มบ๊วยเค็ม (ฟรี)</option>
+                                    <option value="กะปิปลาร้า (+20฿)" ${cur === 'กะปิปลาร้า (+20฿)' ? 'selected' : ''}>กะปิปลาร้า (+20฿)</option>
+                                    <option value="กะปิหวาน (+20฿)" ${cur === 'กะปิหวาน (+20฿)' ? 'selected' : ''}>กะปิหวาน (+20฿)</option>
                                 </select>
-                            </div>
-                        `;
+                            </div>`;
                     }
-                    sauceSelectorHTML += `</div>`;
+                    sauceHTML += `</div>`;
                 }
 
-                const isCustom = id.startsWith('custom_');
-                const row = document.createElement('div');
-                row.className = 'cart-item';
-                row.innerHTML = `
+                const div = document.createElement('div');
+                div.className = 'cart-item';
+                div.innerHTML = `
                     <div class="cart-item-main">
-                        <div style="flex:1; line-height: 1.3;">
-                            ${item.name} ${isCustom ? '<small style="color:#2980b9; font-size:11px;">[พิเศษ]</small>' : ''}<br>
-                            <small style="color:#d35400; font-weight:bold;">${item.price > 0 ? item.price + '฿' : 'ฟรี'}</small>
+                        <div style="flex:1;">
+                            ${item.name} ${id.startsWith('custom_') ? '<small style="color:#2980b9;">[พิเศษ]</small>' : ''}<br>
+                            <small style="color:var(--primary); font-weight:bold;">${item.price > 0 ? item.price + '฿' : 'ฟรี'}</small>
                         </div>
-                        <div class="cart-controls" style="display:flex; align-items:center;">
+                        <div class="cart-controls">
                             <button onclick="updateQty('${id}', -1)">-</button>
                             <span style="margin:0 10px; font-weight:bold;">${qty}</span>
                             <button onclick="updateQty('${id}', 1)">+</button>
                         </div>
-                        <div style="width: 50px; text-align:right; font-weight:bold;">${totalItem} ฿</div>
+                        <div style="width:50px; text-align:right; font-weight:bold;">${totalItem} ฿</div>
                     </div>
-                    ${sauceSelectorHTML}
+                    ${sauceHTML}
                 `;
-                list.appendChild(row);
+                list.appendChild(div);
             }
 
-            if(Object.keys(cart).length === 0) {
-                list.innerHTML = '<div style="color:#999; text-align:center; padding-top:50px; font-size:14px;">ยังไม่มีรายการสั่งซื้อ<br>คลิกเลือกผลไม้ หรือพิมพ์เพิ่มรายการพิเศษ</div>';
+            if (!Object.keys(cart).length) {
+                list.innerHTML = '<div style="color:#999; text-align:center; padding-top:35px; font-size:14px;">ยังไม่มีรายการสั่งซื้อ</div>';
             }
 
             document.getElementById('subtotal').innerText = subtotal + ' ฿';
@@ -664,144 +499,96 @@
             document.getElementById('grand-total').innerText = (subtotal + deliveryFee) + ' ฿';
         }
 
-        // Auto Paste ดึงข้อมูลและเซฟขึ้นชีททันที
         function parseAutoOrder() {
             const text = document.getElementById('auto-paste-area').value;
             if (!text.trim()) { alert('กรุณาวางข้อความสั่งซื้อของลูกค้าก่อนครับ 😊'); return; }
-            
+
             cart = {}; cartSauces = {};
-            const lines = text.split('\n');
-            let custName = ''; let custPhone = ''; let custAddress = ''; let custNote = '';
-            
-            lines.forEach(line => {
+            let custName = '', custPhone = '', custAddress = '', custNote = '';
+
+            text.split('\n').forEach(line => {
                 line = line.trim();
-                if (line.includes('ชื่อลูกค้า:')) { custName = line.split('ชื่อลูกค้า:')[1].trim(); }
-                else if (line.includes('เบอร์โทร:')) { custPhone = line.split('เบอร์โทร:')[1].trim(); }
-                else if (line.includes('สถานที่จัดส่ง:')) { custAddress = line.split('สถานที่จัดส่ง:')[1].trim(); }
-                else if (line.includes('หมายเหตุ:')) { custNote = line.split('หมายเหตุ:')[1].trim(); }
+                if (line.includes('ชื่อลูกค้า:')) custName = line.split('ชื่อลูกค้า:')[1].trim();
+                else if (line.includes('เบอร์โทร:')) custPhone = line.split('เบอร์โทร:')[1].trim();
+                else if (line.includes('สถานที่จัดส่ง:')) custAddress = line.split('สถานที่จัดส่ง:')[1].trim();
+                else if (line.includes('หมายเหตุ:')) custNote = line.split('หมายเหตุ:')[1].trim();
                 else if (line.startsWith('-')) {
                     const parts = line.split(/\s+x\s+/);
                     if (parts.length >= 2) {
-                        const leftPart = parts[0].replace(/^-\s*/, '').trim(); 
-                        const rightPart = parts[1].trim(); 
-                        
-                        let matchedId = null;
-                        for (const id in itemDictionary) {
-                            if (leftPart.includes(itemDictionary[id].name)) { matchedId = id; break; }
-                        }
-                        
-                        if (matchedId) {
-                            const qtyMatch = rightPart.match(/^(\d+)/);
+                        const left = parts[0].replace(/^-\s*/, '').trim();
+                        const right = parts[1].trim();
+                        const matched = Object.values(itemDictionary).find(i => left.includes(i.name));
+                        if (matched) {
+                            const qtyMatch = right.match(/^(\d+)/);
                             if (qtyMatch) {
                                 const qty = parseInt(qtyMatch[1]);
-                                cart[matchedId] = qty;
-                                
-                                const sauceMatch = rightPart.match(/\((.*)\)/);
-                                if (sauceMatch && !isServiceItem(itemDictionary[matchedId]) && checkFruitSauceEligibility(itemDictionary[matchedId].name)) {
+                                cart[matched.id] = qty;
+                                const sauceMatch = right.match(/\((.*)\)/);
+                                if (sauceMatch && !isServiceItem(matched) && checkFruitSauceEligibility(matched.name)) {
                                     const sauces = sauceMatch[1].split(/,\s+/);
-                                    cartSauces[matchedId] = [];
-                                    for(let i=0; i<qty; i++) {
-                                        let s = sauces[i] ? sauces[i].trim() : "พริกเกลือนัวร์ (ฟรี)";
-                                        s = s.replace(/\s*\*ไม่ฟรี/, '');
-                                        cartSauces[matchedId].push(s);
-                                    }
-                                } else if (!isServiceItem(itemDictionary[matchedId]) && checkFruitSauceEligibility(itemDictionary[matchedId].name)) {
-                                    cartSauces[matchedId] = Array(qty).fill("พริกเกลือนัวร์ (ฟรี)");
+                                    cartSauces[matched.id] = Array.from({length: qty}, (_, i) => (sauces[i] || "พริกเกลือนัวร์ (ฟรี)").replace(/\s*\*ไม่ฟรี/, ''));
                                 }
                             }
                         }
                     }
                 }
             });
-            
+
             document.getElementById('customer-name').value = custName;
             document.getElementById('customer-phone').value = custPhone;
             document.getElementById('customer-address').value = custAddress;
             document.getElementById('order-note').value = custNote;
 
-            const cleanInputPhone = cleanPhone(custPhone);
-            if (!custAddress && (cleanInputPhone || custName)) {
-                const found = customerList.find(c => (cleanInputPhone && cleanPhone(c.phone) === cleanInputPhone) || (custName && c.name.toLowerCase() === custName.toLowerCase()));
-                if (found && found.address) {
-                    document.getElementById('customer-address').value = found.address;
-                }
-            }
+            const cPhone = cleanPhone(custPhone);
+            const foundIdx = customerList.findIndex(c => (cPhone && cleanPhone(c.phone) === cPhone) || (custName && c.name.toLowerCase() === custName.toLowerCase()));
 
-            // สั่ง Auto-Save ทันที
-            if (custName || custPhone) {
-                saveCustomerOnline(custName, custPhone, document.getElementById('customer-address').value.trim());
+            if (foundIdx >= 0) {
+                document.getElementById('customer-dropdown').value = foundIdx;
+                if (!custAddress && customerList[foundIdx].address) {
+                    document.getElementById('customer-address').value = customerList[foundIdx].address;
+                }
+                showSaveStatus(`🔍 พบลูกค้าในระบบ (${customerList[foundIdx].name})`, '#2980b9');
+            } else {
+                document.getElementById('customer-dropdown').value = "";
+                showSaveStatus(`✨ ข้อมูลลูกค้าใหม่ (กดปุ่มบันทึกลงชีทได้เลยค่ะ)`, '#d35400');
             }
 
             renderCart();
-            alert('✨ ดึงข้อมูลลูกค้า ที่อยู่ และรายการสั่งซื้อเรียบร้อยแล้ว!');
-            document.getElementById('auto-paste-area').value = ''; 
+            alert('✨ ดึงข้อมูลคำสั่งซื้อเรียบร้อยแล้ว!');
+            document.getElementById('auto-paste-area').value = '';
         }
 
         function generateReceiptImage() {
-            if(Object.keys(cart).length === 0) { alert('กรุณาเพิ่มสินค้าลงตะกร้าก่อนสร้างใบเสร็จ'); return; }
-
-            const custName = document.getElementById('customer-name').value.trim();
-            const custPhone = document.getElementById('customer-phone').value.trim();
-            const custAddress = document.getElementById('customer-address').value.trim();
-            const note = document.getElementById('order-note').value.trim();
-
-            saveCustomerOnline(custName, custPhone, custAddress);
-
-            const receiptWindow = window.open('', '_blank');
-            if (receiptWindow) {
-                receiptWindow.document.write(`
-                    <html>
-                    <head>
-                        <title>กำลังออกใบเสร็จ...</title>
-                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                        <style>
-                            body { font-family: sans-serif; text-align: center; padding: 50px 20px; background: #fafafa; color: #333; }
-                            .loader { font-size: 18px; font-weight: bold; color: #d35400; }
-                        </style>
-                    </head>
-                    <body>
-                        <div class="loader">⏳ กำลังออกใบเสร็จ...<br>กรุณารอสักครู่แป๊บเดียวนะคะ</div>
-                    </body>
-                    </html>
-                `);
-            }
+            if (!Object.keys(cart).length) { alert('กรุณาเพิ่มสินค้าลงตะกร้าก่อนสร้างใบเสร็จ'); return; }
 
             const btn = document.getElementById('btn-download');
             btn.innerText = 'กำลังออกใบเสร็จ...'; btn.disabled = true;
-            
+
             const now = new Date();
-            const timeStr = now.toLocaleDateString('th-TH') + ' ' + now.toLocaleTimeString('th-TH').substring(0,5) + ' น.';
-            
-            const yy = now.getFullYear();
-            const mm = String(now.getMonth() + 1).padStart(2, '0');
-            const dd = String(now.getDate()).padStart(2, '0');
-            const hh = String(now.getHours()).padStart(2, '0');
-            const mins = String(now.getMinutes()).padStart(2, '0');
-            const secs = String(now.getSeconds()).padStart(2, '0');
-            const fileName = `Receipt_${yy}${mm}${dd}_${hh}${mins}${secs}.png`;
+            const timeStr = `${now.toLocaleDateString('th-TH')} ${now.toLocaleTimeString('th-TH').substring(0,5)} น.`;
+            const fileName = `Receipt_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}.png`;
+
+            const name = document.getElementById('customer-name').value.trim();
+            const phone = document.getElementById('customer-phone').value.trim();
+            const addr = document.getElementById('customer-address').value.trim();
+            const note = document.getElementById('order-note').value.trim();
 
             document.getElementById('r-time').innerText = 'เวลารับออเดอร์ : ' + timeStr;
-            document.getElementById('r-channel').innerText = 'ช่องทาง : ' + orderChannel; 
-            
-            const customerDisplay = (custName + (custPhone ? ' (' + custPhone + ')' : '')).trim() || 'ลูกค้าทั่วไป';
-            document.getElementById('r-customer').innerText = 'ลูกค้า : ' + customerDisplay;
-            
+            document.getElementById('r-channel').innerText = 'ช่องทาง : ' + orderChannel;
+            document.getElementById('r-customer').innerText = 'ลูกค้า : ' + ((name + (phone ? ` (${phone})` : '')).trim() || 'ลูกค้าทั่วไป');
+
             const rAddr = document.getElementById('r-address');
-            if (custAddress) {
-                rAddr.innerText = '📍 ที่อยู่ส่ง : ' + custAddress;
-                rAddr.style.display = 'block';
-            } else {
-                rAddr.style.display = 'none';
-            }
+            if (addr) { rAddr.innerText = '📍 ที่อยู่ส่ง : ' + addr; rAddr.style.display = 'block'; }
+            else { rAddr.style.display = 'none'; }
 
             const rNote = document.getElementById('r-note');
-            if(note !== "") { rNote.innerText = '📌 หมายเหตุ: ' + note; rNote.style.display = 'block'; } 
+            if (note) { rNote.innerText = '📌 หมายเหตุ: ' + note; rNote.style.display = 'block'; }
             else { rNote.style.display = 'none'; }
 
             const rItems = document.getElementById('r-items');
             rItems.innerHTML = '';
-            
             let subtotal = 0;
+
             for (const id in cart) {
                 const item = itemDictionary[id];
                 if (!item) continue;
@@ -810,72 +597,28 @@
                 subtotal += total;
 
                 // กรองไม่แสดง "ไม่รับน้ำจิ้ม" บนใบเสร็จ
-                let sauceLine = '';
-                if (cartSauces[id] && cartSauces[id].length > 0) {
-                    const validSauces = cartSauces[id].filter(s => s && s !== 'ไม่รับน้ำจิ้ม' && !s.includes('ไม่รับ'));
-                    if (validSauces.length > 0) {
-                        sauceLine = `<br><small style="color:#555; font-style:italic;">(${validSauces.join(', ')})</small>`;
-                    }
-                }
+                const validSauces = (cartSauces[id] || []).filter(s => s && !s.includes('ไม่รับ'));
+                const sauceLine = validSauces.length ? `<br><small style="color:#555; font-style:italic;">(${validSauces.join(', ')})</small>` : '';
 
-                rItems.innerHTML += `
-                    <tr>
-                        <td style="padding-right: 5px; line-height:1.2;">${item.name}${sauceLine}</td>
-                        <td class="center">x${qty}</td>
-                        <td class="right">${total}</td>
-                    </tr>
-                `;
+                rItems.innerHTML += `<tr><td style="padding-right:5px;">${item.name}${sauceLine}</td><td style="text-align:center;">x${qty}</td><td style="text-align:right;">${total}</td></tr>`;
             }
 
             document.getElementById('r-subtotal').innerText = subtotal + ' ฿';
             document.getElementById('r-delfee').innerText = deliveryFee + ' ฿';
-            document.getElementById('grand-total').innerText = (subtotal + deliveryFee) + ' ฿';
+            document.getElementById('r-grandtotal').innerText = (subtotal + deliveryFee) + ' ฿';
 
             setTimeout(() => {
-                const receiptElement = document.getElementById('receipt');
-                
-                html2canvas(receiptElement, { 
-                    scale: 2, 
-                    backgroundColor: '#ffffff', 
-                    useCORS: true,
-                    logging: false
-                }).then(canvas => {
+                html2canvas(document.getElementById('receipt'), { scale: 2, backgroundColor: '#ffffff', logging: false }).then(canvas => {
                     const imgData = canvas.toDataURL("image/png");
-                    const dlBtnHtml = `<a href="${imgData}" download="${fileName}" style="background:#27ae60; color:white; padding:12px; border-radius:6px; display:block; text-decoration:none; font-weight:bold; margin-top:15px; margin-bottom:15px; font-family:'Sarabun'; width:100%; box-sizing:border-box; font-size:15px;">💾 บันทึกใบเสร็จ</a>`;
-
-                    if (receiptWindow && !receiptWindow.closed) {
-                        receiptWindow.document.body.innerHTML = `
-                            <style>
-                                @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap');
-                                body { font-family: 'Sarabun', sans-serif; text-align: center; padding: 20px 10px; background: #f4f4f4; margin: 0; color: #333; }
-                                .card { background: white; padding: 20px; border-radius: 12px; max-width: 380px; margin: 0 auto; box-shadow: 0 4px 15px rgba(0,0,0,0.1); box-sizing: border-box; }
-                                .hint { color: #d35400; font-weight: bold; margin-bottom: 15px; font-size: 15px; line-height: 1.5; background: #fff0d4; padding: 12px; border-radius: 8px; border: 1px dashed #d35400; }
-                                img { width: 100%; max-width: 240px; height: auto; border: 1px solid #ccc; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); display: block; margin: 0 auto; }
-                                .btn-close { margin-top: 10px; padding: 10px 25px; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; font-family: 'Sarabun'; background: #666; color: white; width: 100%; }
-                            </style>
-                            <div class="card">
-                                <div class="hint">📸 แตะค้างที่รูปภาพใบเสร็จ<br>หรือกดปุ่ม <b>บันทึกใบเสร็จ</b> ด้านล่างได้เลยค่ะ</div>
-                                <img src="${imgData}" alt="ใบเสร็จรับเงิน">
-                                ${dlBtnHtml}
-                                <button class="btn-close" onclick="window.close()">❌ ปิดหน้านี้</button>
-                            </div>
-                        `;
-                    } else {
-                        document.getElementById('receipt-result-img').src = imgData;
-                        document.getElementById('dl-btn-container').innerHTML = dlBtnHtml;
-                        document.getElementById('receipt-modal').style.display = 'flex';
-                    }
-
-                    btn.innerText = '🧾 ออกใบเสร็จ'; 
-                    btn.disabled = false;
-                }).catch(err => {
-                    console.error(err); 
+                    document.getElementById('receipt-result-img').src = imgData;
+                    document.getElementById('dl-btn-container').innerHTML = `<a href="${imgData}" download="${fileName}" style="background:#27ae60; color:white; padding:12px; border-radius:6px; display:block; text-decoration:none; font-weight:bold; margin-bottom:10px;">💾 บันทึกใบเสร็จ</a>`;
+                    document.getElementById('receipt-modal').style.display = 'flex';
+                }).catch(() => {
                     alert("ไม่สามารถสร้างรูปภาพได้ กรุณาลองใหม่อีกครั้ง");
-                    if (receiptWindow) receiptWindow.close();
-                    btn.innerText = '🧾 ออกใบเสร็จ'; 
-                    btn.disabled = false;
+                }).finally(() => {
+                    btn.innerText = '🧾 ออกใบเสร็จ'; btn.disabled = false;
                 });
-            }, 300);
+            }, 250);
         }
 
         function closeReceiptModal() {
