@@ -25,9 +25,9 @@
 
         /* การ์ดฝั่งเมนูและตะกร้า */
         .menu-section, .cart-section { background: var(--white); padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .menu-section { flex: 1.8; }
-        .cart-section { flex: 1.2; display: flex; flex-direction: column; position: sticky; top: 20px; max-height: calc(100vh - 40px); overflow-y: auto; }
-        h2 { margin: 0 0 15px 0; color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 8px; }
+        .menu-section { flex: 1.8; text-align: left; }
+        .cart-section { flex: 1.2; display: flex; flex-direction: column; position: sticky; top: 20px; max-height: calc(100vh - 40px); overflow-y: auto; text-align: left; }
+        h2 { margin: 0 0 15px 0; color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 8px; text-align: left; }
 
         /* ช่องวางข้อความ Auto-Paste */
         .auto-paste-box { background: #eef6ff; border: 1px solid #b3d7ff; padding: 12px; border-radius: 8px; margin-bottom: 12px; }
@@ -45,31 +45,31 @@
         .customer-box { background: #fdfefe; border: 1px solid #d5dbdb; padding: 12px; border-radius: 8px; margin-bottom: 12px; }
         .customer-box select { width: 100%; padding: 8px; border: 1px solid var(--blue); border-radius: 4px; font-size: 13px; font-weight: 500; background: #fff; margin-bottom: 10px; }
         .form-group { margin-bottom: 10px; }
-        .form-group label { display: block; font-size: 13px; margin-bottom: 3px; font-weight: 600; }
+        .form-group label { display: block; font-size: 13px; margin-bottom: 3px; font-weight: 600; text-align: left; }
         .form-group label span.req { color: var(--danger); }
         .form-group input, .form-group textarea { width: 100%; padding: 7px 10px; border: 1px solid var(--border); border-radius: 4px; font-size: 14px; }
         .btn-save-cust { background: #2980b9; color: white; border: none; padding: 8px; border-radius: 4px; font-size: 13px; font-weight: bold; width: 100%; cursor: pointer; }
         .btn-save-cust:hover { background: #1f618d; }
         .btn-clear-cust { background: #ecf0f1; color: #555; border: 1px solid #ccc; padding: 3px 8px; border-radius: 4px; font-size: 12px; cursor: pointer; float: right; }
-        .status-badge { font-size: 12px; margin-top: 4px; min-height: 16px; font-weight: 500; }
+        .status-badge { font-size: 12px; margin-top: 4px; min-height: 16px; font-weight: 500; text-align: left; }
 
         /* รายการสินค้าในเมนู */
-        .category-title { padding: 8px 10px; border-radius: 5px; margin: 15px 0 10px; font-weight: 600; color: var(--primary); font-size: 17px; background: #fdf2e9; }
+        .category-title { padding: 8px 10px; border-radius: 5px; margin: 15px 0 10px; font-weight: 600; color: var(--primary); font-size: 17px; background: #fdf2e9; text-align: left; }
         .cat-dip { background: #fff0d4; }
         .cat-service { background: #f4ecf7; color: var(--purple); }
-        .menu-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px dashed var(--border); }
+        .menu-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px dashed var(--border); text-align: left; }
         .menu-item.out-of-stock { opacity: 0.6; background: #fafafa; }
         .menu-item.out-of-stock .item-name { text-decoration: line-through; color: #999; }
-        .item-name { cursor: pointer; flex: 1; font-size: 15px; padding-right: 10px; }
+        .item-name { cursor: pointer; flex: 1; font-size: 15px; padding-right: 10px; text-align: left; }
         .btn-add { background: var(--primary); color: white; width: 70px; border: none; border-radius: 4px; padding: 6px; cursor: pointer; }
         .btn-disabled { background: #ccc; color: white; width: 70px; border: none; border-radius: 4px; padding: 6px; cursor: not-allowed; }
 
         /* ตะกร้าสินค้า */
-        .cart-list { flex: 1; overflow-y: auto; margin-bottom: 15px; min-height: 90px; border: 1px solid var(--border); padding: 10px; border-radius: 5px; background: #fafafa; }
-        .cart-item { display: flex; flex-direction: column; margin-bottom: 10px; font-size: 14px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+        .cart-list { flex: 1; overflow-y: auto; margin-bottom: 15px; min-height: 90px; border: 1px solid var(--border); padding: 10px; border-radius: 5px; background: #fafafa; text-align: left; }
+        .cart-item { display: flex; flex-direction: column; margin-bottom: 10px; font-size: 14px; border-bottom: 1px solid #eee; padding-bottom: 8px; text-align: left; }
         .cart-item-main { display: flex; justify-content: space-between; align-items: center; width: 100%; }
         .cart-controls button { width: 28px; height: 28px; cursor: pointer; border: 1px solid #ccc; background: #fff; border-radius: 3px; font-weight: bold; }
-        .cart-sauce-row { background: #fff; padding: 6px; border-radius: 4px; border: 1px dashed #ccc; margin-top: 6px; font-size: 12px; display: flex; flex-direction: column; gap: 4px; }
+        .cart-sauce-row { background: #fff; padding: 6px; border-radius: 4px; border: 1px dashed #ccc; margin-top: 6px; font-size: 12px; display: flex; flex-direction: column; gap: 4px; text-align: left; }
         .cart-sauce-select { padding: 3px; border-radius: 4px; border: 1px solid #ccc; font-size: 12px; width: 100%; }
 
         /* ปุ่มเลือกช่องทาง & ค่าส่ง */
@@ -109,7 +109,9 @@
         <!-- ฝั่งเมนูผลไม้ -->
         <div class="menu-section">
             <h2>📦 ระบบจัดการออเดอร์หน้าร้าน (POS)</h2>
-            <div id="menu-container" style="text-align:center; padding:40px; color:#666;">กำลังโหลดฐานข้อมูลจากคลาวด์... ⏳</div>
+            <div id="menu-container">
+                <div style="text-align:center; padding:40px; color:#666;">กำลังโหลดฐานข้อมูลจากคลาวด์... ⏳</div>
+            </div>
         </div>
 
         <!-- ฝั่งตะกร้าและข้อมูลลูกค้า -->
